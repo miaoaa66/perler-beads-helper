@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拼豆辅助工具</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+    .control-group label {
+      font-size: 14px;
+      color: #aaa;
+    }
+    .control-group input[type="file"] {
+      background: #0f3460;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+    }
+    .control-group input[type="number"] {
+      background: #0f3460;
+      border: 1px solid #00d9ff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: #fff;
+      width: 100%;
+      font-size: 16px;
+    }
+    .control-group input[type="number"]:focus {
+      outline: none;
+      border-color: #00ff88;
+    }
+    .image-info {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #00d9ff;
+    }
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: linear-gradient(90deg, #0f3460, #00d9ff, #0f3460);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #00d9ff, #00a8cc);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 217, 255, 0.5);
+      transition: transform 0.2s;
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    .btn {
+      background: linear-gradient(135deg, #00d9ff, #00a8cc);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .btn-small {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .preview-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #16213e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .canvas-wrapper {
+      position: relative;
+      background: #0f3460;
+      border-radius: 4px;
+      overflow: visible;
+    }
+    .main-canvas {
+      image-rendering: pixelated;
+      cursor: crosshair;
+      border: none;
+      display: block;
+    }
+    .highlight-overlay {
+      position: absolute;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .highlight-row {
+      background: rgba(0, 217, 255, 0.3);
+    }
+    .highlight-col {
+      background: rgba(0, 217, 255, 0.3);
+    }
+    .highlight-row.hover {
+      background: rgba(0, 255, 136, 0.15);
+      z-index: 5;
+    }
+    .highlight-col.hover {
+      background: rgba(0, 255, 136, 0.15);
+      z-index: 5;
+    }
+    .position-info {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 12px 15px;
+      border-radius: 8px;
+      color: #00d9ff;
+      font-size: 13px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .hovered-info {
+      top: 20px;
+      left: 20px;
+      border: 1px solid #00d9ff;
+    }
+    .selected-info {
+      top: 20px;
+      left: 220px;
+      border: 1px solid #ff6b6b;
+    }
+    .info-title {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 4px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .hovered-info .info-title {
+      color: #00d9ff;
+    }
+    .selected-info .info-title {
+      color: #ff6b6b;
+    }
+    .position-row {
+      display: flex;
+      gap: 10px;
+    }
+    .position-info span {
+      color: #fff;
+    }
+    .color-code {
+      font-family: monospace;
+    }
+    .color-swatch {
+      width: 50px;
+      height: 50px;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+    .hovered-info .color-swatch {
+      border: 2px solid #00d9ff;
+    }
+    .selected-info .color-swatch {
+      border: 2px solid #ff6b6b;
+    }
+    .zoom-info {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px 15px;
+      border-radius: 8px;
+      color: #00d9ff;
+      font-size: 14px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px;
+      color: #666;
+    }
+    .empty-state p {
+      margin-top: 10px;
+    }
+    .drawer-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+    }
+    .drawer-toggle {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #00d9ff, #00a8cc);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .drawer-toggle:hover {
+      transform: rotate(90deg);
+      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.6);
+    }
+    .drawer-content {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      width: 280px;
+      background: #16213e;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .drawer-content.open {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .drawer-content h3 {
+      color: #00d9ff;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #0f3460;
+    }
+    .drawer-content .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .canvas-wrapper.dragging {
+      cursor: grabbing;
+    }
+    .canvas-wrapper:not(.dragging) {
+      cursor: grab;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="drawer-container">
+      <button class="drawer-toggle" @click="toggleDrawer">☰</button>
+      <div class="drawer-content" :class="{ open: drawerOpen }">
+        <h3>操作面板</h3>
+        
+        <div class="control-group">
+          <label>上传图片</label>
+          <input type="file" accept="image/*" @change="handleImageUpload" ref="fileInput">
+          <div v-if="imageInfo" class="image-info">{{ imageRatio }}</div>
+        </div>
+
+        <div class="control-group">
+          <label>宽度 (像素点)</label>
+          <input type="number" v-model.number="pixelWidth" min="5" max="200" @input="generatePixelArt">
+        </div>
+
+        <div class="control-group">
+          <label>高度 (像素点)</label>
+          <input type="number" v-model.number="pixelHeight" min="5" max="200" @input="generatePixelArt">
+        </div>
+
+        <div class="control-group">
+          <label>颜色数量: {{ colorCount }}</label>
+          <input type="range" v-model.number="colorCount" min="2" max="256" step="1" @input="applyColorQuantization">
+        </div>
+
+        <button class="btn btn-secondary" @click="downloadPixelArt" :disabled="!pixelData">
+          下载像素画
+        </button>
+
+        <div class="control-group btn-group">
+          <button class="btn btn-small" @click="flipHorizontal" :disabled="!originalImage">水平翻转</button>
+        </div>
+
+        <div class="control-group">
+          <label>缩放: {{ Math.round(scale * 100) }}%</label>
+          <input type="range" v-model.number="scale" min="0.2" max="5" step="0.1">
+        </div>
+
+        <button class="btn btn-secondary" @click="resetPosition" :disabled="!originalImage">
+          重置位置
+        </button>
+      </div>
+    </div>
+
+    <div class="preview-container" ref="previewContainer" @wheel.prevent="handleWheel" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
+      <div v-if="!originalImage" class="empty-state">
+        <p>👆 请上传一张图片开始</p>
+      </div>
+
+      <div v-else 
+           class="canvas-wrapper" 
+           :class="{ dragging: isDragging }"
+           :style="{ 
+             transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
+             transformOrigin: 'top left'
+           }">
+        <canvas
+          ref="mainCanvas"
+          class="main-canvas"
+          :width="canvasWidth"
+          :height="canvasHeight"
+          @click="handleCanvasClick"
+          @mousemove="handleCanvasHover"
+          @mouseleave="handleCanvasLeave"
+        ></canvas>
+        
+        <div 
+          v-if="hoveredPixel"
+          class="highlight-overlay highlight-row hover"
+          :style="{ top: (rulerHeight + hoveredPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
+        ></div>
+        <div 
+          v-if="hoveredPixel"
+          class="highlight-overlay highlight-col hover"
+          :style="{ left: (rulerWidth + hoveredPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
+        ></div>
+        
+        <div 
+          v-if="selectedPixel"
+          class="highlight-overlay highlight-row"
+          :style="{ top: (rulerHeight + selectedPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
+        ></div>
+        <div 
+          v-if="selectedPixel"
+          class="highlight-overlay highlight-col"
+          :style="{ left: (rulerWidth + selectedPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
+        ></div>
+      </div>
+    </div>
+
+    <div class="position-info hovered-info" v-if="hoveredPixel && hoveredPixelColor">
+      <div class="info-title">悬浮</div>
+      <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> | Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
+      <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
+      <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }}, {{ hoveredPixelColor.g }}, {{ hoveredPixelColor.b }}</span></div>
+      <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
+    </div>
+
+    <div class="position-info selected-info" v-if="selectedPixel && selectedPixelColor">
+      <div class="info-title">选中</div>
+      <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> | Y: <span>{{ selectedPixel.y + 1 }}</span></div>
+      <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
+      <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }}, {{ selectedPixelColor.g }}, {{ selectedPixelColor.b }}</span></div>
+      <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
+    </div>
+
+    <div class="zoom-info">
+      当前缩放: {{ Math.round(scale * 100) }}% | 滚轮缩放 | 拖动移动 | 像素点: {{ pixelWidth }} × {{ pixelHeight }}
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch, nextTick } = Vue;
+
+    createApp({
+      setup() {
+        const fileInput = ref(null);
+        const mainCanvas = ref(null);
+        const previewContainer = ref(null);
+        const originalImage = ref(null);
+        const pixelWidth = ref(52);
+        const pixelHeight = ref(52);
+        const cellSize = ref(20);
+        const rulerWidth = ref(40);
+        const rulerHeight = ref(24);
+        const scale = ref(1);
+        const pixelData = ref(null);
+        const hoveredPixel = ref(null);
+        const selectedPixel = ref(null);
+        const drawerOpen = ref(false);
+        const isDragging = ref(false);
+        const offsetX = ref(0);
+        const offsetY = ref(0);
+        const lastMouseX = ref(0);
+        const lastMouseY = ref(0);
+
+        const canvasWidth = computed(() => pixelWidth.value * cellSize.value + rulerWidth.value);
+        const canvasHeight = computed(() => pixelHeight.value * cellSize.value + rulerHeight.value);
+
+        const handleImageUpload = (event) => {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              originalImage.value = img;
+              imageInfo.value = { width: img.width, height: img.height };
+              nextTick(() => {
+                generatePixelArt();
+              });
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        };
+
+        const imageInfo = ref(null);
+        const imageRatio = computed(() => {
+          if (!imageInfo.value) return '';
+          const { width, height } = imageInfo.value;
+          const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+          const g = gcd(width, height);
+          return `${width} × ${height} (${width/g}:${height/g})`;
+        });
+
+        /**
+         * 根据像素坐标获取颜色信息
+         * @param {Object} pixel - 像素坐标对象 {x, y}
+         * @returns {Object|null} 颜色对象 {r, g, b, hex} 或 null
+         */
+        const getPixelColor = (pixel) => {
+          if (!pixel || !pixelData.value) return null;
+          const { x, y } = pixel;
+          const i = (y * pixelWidth.value + x) * 4;
+          const r = pixelData.value.data[i];
+          const g = pixelData.value.data[i + 1];
+          const b = pixelData.value.data[i + 2];
+          const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+          return { r, g, b, hex };
+        };
+
+        const hoveredPixelColor = computed(() => getPixelColor(hoveredPixel.value));
+        const selectedPixelColor = computed(() => getPixelColor(selectedPixel.value));
+        const colorCount = ref(256);
+        let originalPixelData = null;
+
+        const applyColorQuantization = () => {
+          if (!originalPixelData) return;
+          
+          const data = originalPixelData.data;
+          const w = pixelWidth.value;
+          const h = pixelHeight.value;
+          
+          const colorMap = new Map();
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] < 128) continue;
+            const r = data[i] >> 3;
+            const g = data[i + 1] >> 3;
+            const b = data[i + 2] >> 3;
+            const key = (r << 10) | (g << 5) | b;
+            colorMap.set(key, (colorMap.get(key) || 0) + 1);
+          }
+          
+          const sortedColors = [...colorMap.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, colorCount.value)
+            .map(([key]) => ({
+              r: (key >> 10 & 31) << 3,
+              g: (key >> 5 & 31) << 3,
+              b: (key & 31) << 3
+            }));
+          
+          const newData = new Uint8ClampedArray(data.length);
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] < 128) {
+              newData[i] = 0;
+              newData[i + 1] = 0;
+              newData[i + 2] = 0;
+              newData[i + 3] = 0;
+              continue;
+            }
+            
+            let minDist = Infinity;
+            let closest = sortedColors[0] || { r: 0, g: 0, b: 0 };
+            
+            for (const color of sortedColors) {
+              const dr = data[i] - color.r;
+              const dg = data[i + 1] - color.g;
+              const db = data[i + 2] - color.b;
+              const dist = dr * dr + dg * dg + db * db;
+              if (dist < minDist) {
+                minDist = dist;
+                closest = color;
+              }
+            }
+            
+            newData[i] = closest.r;
+            newData[i + 1] = closest.g;
+            newData[i + 2] = closest.b;
+            newData[i + 3] = 255;
+          }
+          
+          pixelData.value = new ImageData(newData, w, h);
+          renderCanvas();
+        };
+
+        /**
+         * 水平翻转像素图
+         * 将像素数据左右镜像翻转，并重新应用颜色量化
+         */
+        const flipHorizontal = () => {
+          if (!pixelData.value) return;
+
+          const data = pixelData.value.data;
+          const newData = new Uint8ClampedArray(data.length);
+          const w = pixelWidth.value;
+          const h = pixelHeight.value;
+          
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const srcIdx = (y * w + x) * 4;
+              const dstIdx = (y * w + (w - 1 - x)) * 4;
+              newData[dstIdx] = data[srcIdx];
+              newData[dstIdx + 1] = data[srcIdx + 1];
+              newData[dstIdx + 2] = data[srcIdx + 2];
+              newData[dstIdx + 3] = data[srcIdx + 3];
+            }
+          }
+          
+          pixelData.value = new ImageData(newData, w, h);
+          originalPixelData = pixelData.value;
+          if (colorCount.value < 256) {
+            applyColorQuantization();
+          } else {
+            renderCanvas();
+          }
+        };
+
+        /**
+         * 根据设置的宽高重新采样原始图片生成像素画
+         * 支持按比例裁剪图片以适应目标尺寸
+         */
+        const generatePixelArt = () => {
+          if (!originalImage.value) return;
+
+          const img = originalImage.value;
+          const tempCanvas = document.createElement('canvas');
+          const tempCtx = tempCanvas.getContext('2d');
+
+          tempCanvas.width = pixelWidth.value;
+          tempCanvas.height = pixelHeight.value;
+
+          const imgAspect = img.width / img.height;
+          const canvasAspect = pixelWidth.value / pixelHeight.value;
+
+          let drawX = 0, drawY = 0;
+          let drawWidth = img.width;
+          let drawHeight = img.height;
+
+          if (imgAspect > canvasAspect) {
+            drawWidth = img.height * canvasAspect;
+            drawX = (img.width - drawWidth) / 2;
+          } else {
+            drawHeight = img.width / canvasAspect;
+            drawY = (img.height - drawHeight) / 2;
+          }
+
+          tempCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight, 0, 0, pixelWidth.value, pixelHeight.value);
+
+          pixelData.value = tempCtx.getImageData(0, 0, pixelWidth.value, pixelHeight.value);
+          originalPixelData = pixelData.value;
+          
+          if (colorCount.value < 256) {
+            applyColorQuantization();
+          } else {
+            renderCanvas();
+          }
+        };
+
+        /**
+         * 渲染画布：绘制背景、标尺、像素点、网格
+         */
+        const renderCanvas = () => {
+          if (!mainCanvas.value || !pixelData.value) return;
+
+          const canvas = mainCanvas.value;
+          const ctx = canvas.getContext('2d');
+          const data = pixelData.value.data;
+
+          ctx.fillStyle = '#0f3460';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          drawRuler(ctx);
+
+          for (let y = 0; y < pixelHeight.value; y++) {
+            for (let x = 0; x < pixelWidth.value; x++) {
+              const i = (y * pixelWidth.value + x) * 4;
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              const a = data[i + 3];
+
+              ctx.fillStyle = a < 128
+                ? 'transparent'
+                : `rgba(${r}, ${g}, ${b}, 1)`;
+
+              ctx.fillRect(
+                rulerWidth.value + x * cellSize.value,
+                rulerHeight.value + y * cellSize.value,
+                cellSize.value,
+                cellSize.value
+              );
+            }
+          }
+
+          drawGrid(ctx);
+        };
+
+        /**
+         * 绘制左上角标尺区域
+         * @param {CanvasRenderingContext2D} ctx - 画布上下文
+         */
+        const drawRuler = (ctx) => {
+          ctx.fillStyle = '#0f3460';
+          ctx.fillRect(0, 0, rulerWidth.value, rulerHeight.value);
+
+          ctx.strokeStyle = '#00d9ff';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(rulerWidth.value, 0);
+          ctx.lineTo(rulerWidth.value, canvasHeight.value);
+          ctx.moveTo(0, rulerHeight.value);
+          ctx.lineTo(canvasWidth.value, rulerHeight.value);
+          ctx.stroke();
+
+          ctx.fillStyle = '#00d9ff';
+          ctx.font = '12px Microsoft YaHei';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          for (let x = 0; x < pixelWidth.value; x++) {
+            const labelX = rulerWidth.value + x * cellSize.value + cellSize.value / 2;
+            ctx.fillText((x + 1).toString(), labelX, rulerHeight.value / 2);
+          }
+
+          ctx.textAlign = 'right';
+          for (let y = 0; y < pixelHeight.value; y++) {
+            const labelY = rulerHeight.value + y * cellSize.value + cellSize.value / 2;
+            ctx.fillText((y + 1).toString(), rulerWidth.value - 5, labelY);
+          }
+        };
+
+        /**
+         * 绘制像素网格线
+         * @param {CanvasRenderingContext2D} ctx - 画布上下文
+         */
+        const drawGrid = (ctx) => {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+          ctx.lineWidth = 1;
+
+          for (let x = 0; x <= pixelWidth.value; x++) {
+            ctx.beginPath();
+            ctx.moveTo(rulerWidth.value + x * cellSize.value, rulerHeight.value);
+            ctx.lineTo(rulerWidth.value + x * cellSize.value, rulerHeight.value + pixelHeight.value * cellSize.value);
+            ctx.stroke();
+          }
+
+          for (let y = 0; y <= pixelHeight.value; y++) {
+            ctx.beginPath();
+            ctx.moveTo(rulerWidth.value, rulerHeight.value + y * cellSize.value);
+            ctx.lineTo(rulerWidth.value + pixelWidth.value * cellSize.value, rulerHeight.value + y * cellSize.value);
+            ctx.stroke();
+          }
+        };
+
+        const handleWheel = (event) => {
+          const delta = event.deltaY > 0 ? -0.1 : 0.1;
+          const newScale = Math.max(0.2, Math.min(5, scale.value + delta));
+          scale.value = parseFloat(newScale.toFixed(1));
+        };
+
+        const downloadPixelArt = () => {
+          if (!pixelData.value) return;
+
+          const downloadCanvas = document.createElement('canvas');
+          const downloadCtx = downloadCanvas.getContext('2d');
+          downloadCanvas.width = pixelWidth.value * cellSize.value;
+          downloadCanvas.height = pixelHeight.value * cellSize.value;
+
+          const data = pixelData.value.data;
+
+          for (let y = 0; y < pixelHeight.value; y++) {
+            for (let x = 0; x < pixelWidth.value; x++) {
+              const i = (y * pixelWidth.value + x) * 4;
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              const a = data[i + 3];
+
+              downloadCtx.fillStyle = a < 128
+                ? 'transparent'
+                : `rgba(${r}, ${g}, ${b}, 1)`;
+
+              downloadCtx.fillRect(
+                x * cellSize.value,
+                y * cellSize.value,
+                cellSize.value,
+                cellSize.value
+              );
+            }
+          }
+
+          const link = document.createElement('a');
+          link.download = `拼豆像素画_${pixelWidth.value}x${pixelHeight.value}.png`;
+          link.href = downloadCanvas.toDataURL('image/png');
+          link.click();
+        };
+
+        /**
+         * 将鼠标事件坐标转换为像素坐标
+         * @param {MouseEvent} event - 鼠标事件
+         * @returns {Object|null} 像素坐标 {x, y} 或超出范围时返回 null
+         */
+        const getPixelCoordsFromEvent = (event) => {
+          const rect = mainCanvas.value.getBoundingClientRect();
+          const scaleX = rect.width / canvasWidth.value;
+          const scaleY = rect.height / canvasHeight.value;
+
+          const x = (event.clientX - rect.left) / scaleX;
+          const y = (event.clientY - rect.top) / scaleY;
+
+          const px = Math.floor((x - rulerWidth.value) / cellSize.value);
+          const py = Math.floor((y - rulerHeight.value) / cellSize.value);
+
+          if (px >= 0 && px < pixelWidth.value && py >= 0 && py < pixelHeight.value) {
+            return { x: px, y: py };
+          }
+          return null;
+        };
+
+        /**
+         * 处理画布点击事件：选中/取消选中像素点
+         */
+        const handleCanvasClick = (event) => {
+          const coords = getPixelCoordsFromEvent(event);
+          if (!coords) return;
+
+          if (selectedPixel.value && selectedPixel.value.x === coords.x && selectedPixel.value.y === coords.y) {
+            selectedPixel.value = null;
+          } else {
+            selectedPixel.value = coords;
+          }
+        };
+
+        /**
+         * 处理画布鼠标移动事件：更新悬浮像素点
+         */
+        const handleCanvasHover = (event) => {
+          hoveredPixel.value = getPixelCoordsFromEvent(event);
+        };
+
+        const handleCanvasLeave = () => {
+          hoveredPixel.value = null;
+        };
+
+        /** 切换抽屉面板展开/收起 */
+        const toggleDrawer = () => {
+          drawerOpen.value = !drawerOpen.value;
+        };
+
+        /** 鼠标按下：开始拖拽画布 */
+        const handleMouseDown = (event) => {
+          if (event.button === 0) {
+            isDragging.value = true;
+            lastMouseX.value = event.clientX;
+            lastMouseY.value = event.clientY;
+          }
+        };
+
+        /** 鼠标移动：拖拽画布 */
+        const handleMouseMove = (event) => {
+          if (isDragging.value) {
+            const deltaX = event.clientX - lastMouseX.value;
+            const deltaY = event.clientY - lastMouseY.value;
+            offsetX.value += deltaX;
+            offsetY.value += deltaY;
+            lastMouseX.value = event.clientX;
+            lastMouseY.value = event.clientY;
+          }
+        };
+
+        /** 鼠标释放：停止拖拽 */
+        const handleMouseUp = () => {
+          isDragging.value = false;
+        };
+
+        /** 重置画布位置到原点 */
+        const resetPosition = () => {
+          offsetX.value = 0;
+          offsetY.value = 0;
+        };
+
+        /** 监听尺寸变化，重新渲染画布 */
+        watch([pixelWidth, pixelHeight, cellSize], () => {
+          if (pixelData.value) {
+            renderCanvas();
+          }
+        });
+
+        return {
+          fileInput,
+          mainCanvas,
+          previewContainer,
+          originalImage,
+          drawerOpen,
+          isDragging,
+          offsetX,
+          offsetY,
+          pixelWidth,
+          pixelHeight,
+          cellSize,
+          rulerWidth,
+          rulerHeight,
+          scale,
+          canvasWidth,
+          canvasHeight,
+          pixelData,
+          hoveredPixel,
+          hoveredPixelColor,
+          selectedPixelColor,
+          selectedPixel,
+          handleImageUpload,
+          imageInfo,
+          imageRatio,
+          generatePixelArt,
+          flipHorizontal,
+          colorCount,
+          applyColorQuantization,
+          handleWheel,
+          downloadPixelArt,
+          handleCanvasClick,
+          handleCanvasHover,
+          handleCanvasLeave,
+          toggleDrawer,
+          resetPosition,
+          handleMouseDown,
+          handleMouseMove,
+          handleMouseUp
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
