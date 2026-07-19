@@ -359,6 +359,7 @@
       <div v-if="!originalImage" class="empty-state" :class="{ dragging: isDraggingOver }" @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="handleDrop">
         <p>🖼️ 点击此处选择图片</p>
         <p>或将图片拖拽到此处上传</p>
+        <p style="font-size: 12px; color: #888; margin-top: 15px;">支持格式: JPEG、PNG、WebP、AVIF、BMP、GIF | 最大 20MB</p>
       </div>
 
       <div v-else 
@@ -454,6 +455,21 @@
 
         const processFile = (file) => {
           if (!file) return;
+
+          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp', 'image/gif'];
+          const maxSize = 20 * 1024 * 1024;
+
+          if (!allowedTypes.includes(file.type)) {
+            alert('不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片');
+            fileInput.value = '';
+            return;
+          }
+
+          if (file.size > maxSize) {
+            alert('图片文件过大，请上传小于 20MB 的图片');
+            fileInput.value = '';
+            return;
+          }
 
           const reader = new FileReader();
           reader.onload = (e) => {
