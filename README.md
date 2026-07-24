@@ -17,3 +17,15 @@
 可以修改颜色数量，适用于颜色不多的情况；   
 可以水平翻转；   
 可以下载像素画图片；   
+
+
+
+
+## 其他工具
+
+```
+https://aigo.fan/
+https://www.bitbead.app/zh/generator
+http://playbeans.icbear.cn/
+
+```
