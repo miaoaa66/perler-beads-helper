@@ -6,7 +6,7 @@
 
 预览图   
 
-![preview](./preview.png)
+![preview](./static/preview.png)
 
 
 使用方法：   
