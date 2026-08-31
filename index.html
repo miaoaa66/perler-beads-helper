@@ -342,6 +342,7 @@
 
         <div class="control-group btn-group">
           <button class="btn btn-small" @click="flipHorizontal" :disabled="!originalImage">水平翻转</button>
+          <button class="btn btn-small" @click="flipVertical" :disabled="!originalImage">垂直翻转</button>
         </div>
 
         <div class="control-group">
@@ -613,6 +614,38 @@
             for (let x = 0; x < w; x++) {
               const srcIdx = (y * w + x) * 4;
               const dstIdx = (y * w + (w - 1 - x)) * 4;
+              newData[dstIdx] = data[srcIdx];
+              newData[dstIdx + 1] = data[srcIdx + 1];
+              newData[dstIdx + 2] = data[srcIdx + 2];
+              newData[dstIdx + 3] = data[srcIdx + 3];
+            }
+          }
+          
+          pixelData.value = new ImageData(newData, w, h);
+          originalPixelData = pixelData.value;
+          if (colorCount.value < 256) {
+            applyColorQuantization();
+          } else {
+            renderCanvas();
+          }
+        };
+
+        /**
+         * 垂直翻转像素图
+         * 将像素数据上下镜像翻转，并重新应用颜色量化
+         */
+        const flipVertical = () => {
+          if (!pixelData.value) return;
+
+          const data = pixelData.value.data;
+          const newData = new Uint8ClampedArray(data.length);
+          const w = pixelWidth.value;
+          const h = pixelHeight.value;
+          
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const srcIdx = (y * w + x) * 4;
+              const dstIdx = ((h - 1 - y) * w + x) * 4;
               newData[dstIdx] = data[srcIdx];
               newData[dstIdx + 1] = data[srcIdx + 1];
               newData[dstIdx + 2] = data[srcIdx + 2];
@@ -927,6 +960,7 @@
           imageRatio,
           generatePixelArt,
           flipHorizontal,
+          flipVertical,
           colorCount,
           applyColorQuantization,
           handleWheel,
