@@ -7,6 +7,7 @@
 预览图   
 
 ![preview](./static/preview.png)
+![preview2](./static/preview2.png)
 
 
 使用方法：   
