@@ -114,6 +114,7 @@
       color: var(--px-cyan);
       text-shadow: 3px 3px 0 #003a4a;
       letter-spacing: 1px;
+      margin: 0;
     }
     .title-accent {
       color: var(--px-yellow);
@@ -131,6 +132,46 @@
       flex-shrink: 0;
       padding-left: 8px;
       border-left: 4px solid #2a2a3f;
+    }
+    /* ============ 仓库入口图标 ============ */
+    .repo-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      padding-left: 14px;
+      border-left: 4px solid #2a2a3f;
+    }
+    .repo-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      color: #9a9ab8;
+      background: var(--px-panel-dark);
+      border: 4px solid var(--px-border);
+      box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.5);
+      transition: color 0.12s steps(2), border-color 0.12s steps(2), transform 0.12s steps(2);
+    }
+    .repo-link svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      display: block;
+    }
+    .repo-link:hover {
+      color: var(--px-cyan);
+      border-color: var(--px-cyan);
+      transform: translate(-1px, -1px);
+    }
+    .repo-link:active {
+      transform: translate(1px, 1px);
+      box-shadow: none;
+    }
+    .repo-link.gitee:hover {
+      color: var(--px-red);
+      border-color: var(--px-red);
     }
 
     /* ============ 主布局 ============ */
@@ -248,6 +289,20 @@
       gap: 12px;
       padding-top: 6px;
       border-top: 4px dashed rgba(255, 255, 255, 0.25);
+    }
+    /* 按钮内的像素图标：统一尺寸并居中，避免 Unicode 符号回退字体后大小不一 */
+    .btn-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      flex-shrink: 0;
+      shape-rendering: crispEdges;
     }
 
     /* ============ 像素滑块 ============ */
@@ -471,11 +526,21 @@
       border-bottom: 4px dashed rgba(255, 255, 255, 0.25);
     }
     .crop-modal-header h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       color: var(--px-yellow);
       font-size: 13px;
       font-family: var(--px-font);
       margin: 0;
       letter-spacing: 1px;
+    }
+    .crop-title-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      flex-shrink: 0;
+      shape-rendering: crispEdges;
     }
     .crop-close {
       margin-left: auto;
@@ -497,6 +562,11 @@
       border-color: var(--px-cyan);
       color: #aaa;
     }
+    .crop-upload-zone.dragging {
+      border-color: var(--px-green);
+      color: var(--px-green);
+      background: rgba(146, 204, 65, 0.1);
+    }
     .crop-upload-zone p {
       margin-top: 14px;
       font-size: 11px;
@@ -517,6 +587,8 @@
       font-size: 11px;
       color: #9a9ab8;
       user-select: none;
+      /* NES.css 给 label 设了 margin-bottom，会导致 flex 居中时整体上移 */
+      margin: 0;
     }
     .px-switch-item input {
       display: none;
@@ -673,6 +745,14 @@
           <span class="cjk">像素字体</span>
         </label>
       </div>
+      <div class="repo-links">
+        <a class="repo-link gitee" href="https://gitee.com/miaoaa66/perler-beads-helper" target="_blank" rel="noopener noreferrer" title="Gitee 仓库" aria-label="Gitee 仓库">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.984 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.016 0zm6.09 5.333c.328 0 .593.266.592.593v1.482a.594.594 0 0 1-.593.592H9.777c-.982 0-1.778.796-1.778 1.778v5.63c0 .327.266.592.593.592h5.63c.982 0 1.778-.796 1.778-1.778v-.296a.593.593 0 0 0-.592-.593h-4.15a.592.592 0 0 1-.592-.592v-1.482a.593.593 0 0 1 .593-.592h6.815c.327 0 .593.265.593.592v3.408a4 4 0 0 1-4 4H5.926a.593.593 0 0 1-.593-.593V9.778a4.444 4.444 0 0 1 4.445-4.444h8.296Z"/></svg>
+        </a>
+        <a class="repo-link github" href="https://github.com/miaoaa66/perler-beads-helper" target="_blank" rel="noopener noreferrer" title="GitHub 仓库" aria-label="GitHub 仓库">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        </a>
+      </div>
     </header>
 
     <main class="main-area">
@@ -690,9 +770,9 @@
         <div class="control-group">
           <label class="px-label">▸ SIZE <span class="cjk">尺寸</span> (<span class="cjk">像素点</span>)</label>
           <div class="input-row">
-            <input type="number" class="px-input" v-model.number="pixelWidth" min="5" max="200" @input="generatePixelArt">
+            <input type="number" class="px-input" :value="pixelWidth" min="5" max="200" step="1" @input="handleSizeInput($event, 'width')">
             <span class="px-x">×</span>
-            <input type="number" class="px-input" v-model.number="pixelHeight" min="5" max="200" @input="generatePixelArt">
+            <input type="number" class="px-input" :value="pixelHeight" min="5" max="200" step="1" @input="handleSizeInput($event, 'height')">
           </div>
         </div>
 
@@ -722,10 +802,45 @@
           <input type="range" class="px-range" v-model.number="scale" min="0.2" max="5" step="0.1">
         </div>
 
+        <div class="control-group">
+          <button class="nes-btn full-btn" @click="resetPosition" :disabled="!originalImage">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="6" y="0" width="2" height="4"/>
+                <rect x="6" y="10" width="2" height="4"/>
+                <rect x="0" y="6" width="4" height="2"/>
+                <rect x="10" y="6" width="4" height="2"/>
+                <rect x="5" y="5" width="4" height="4"/>
+              </svg>
+              <span class="cjk">重置位置</span>
+            </span>
+          </button>
+          <button class="nes-btn is-success full-btn" @click="downloadPixelArt" :disabled="!pixelData">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="6" y="0" width="2" height="5"/>
+                <rect x="4" y="5" width="6" height="2"/>
+                <rect x="5" y="7" width="4" height="2"/>
+                <rect x="6" y="9" width="2" height="2"/>
+                <rect x="1" y="12" width="12" height="2"/>
+              </svg>
+              <span class="cjk">下载像素画</span>
+            </span>
+          </button>
+        </div>
+
         <div class="control-group btn-stack">
-          <button class="nes-btn is-warning full-btn" @click="openCropModal">✂ <span class="cjk">图片裁剪</span></button>
-          <button class="nes-btn full-btn" @click="resetPosition" :disabled="!originalImage">⌖ <span class="cjk">重置位置</span></button>
-          <button class="nes-btn is-success full-btn" @click="downloadPixelArt" :disabled="!pixelData">⬇ <span class="cjk">下载像素画</span></button>
+          <button class="nes-btn is-warning full-btn" @click="openCropModal">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="2" y="0" width="2" height="11"/>
+                <rect x="0" y="2" width="11" height="2"/>
+                <rect x="10" y="2" width="2" height="12"/>
+                <rect x="2" y="10" width="12" height="2"/>
+              </svg>
+              <span class="cjk">图片裁剪</span>
+            </span>
+          </button>
         </div>
       </aside>
 
@@ -806,14 +921,24 @@
     <div v-if="cropModalOpen" class="crop-modal-overlay" @mousedown.self="closeCropModal">
       <div class="crop-modal px-panel">
         <div class="crop-modal-header">
-          <h3>✂ CROP <span class="cjk">图片裁剪</span></h3>
+          <h3>
+            <svg class="crop-title-icon" viewBox="0 0 14 14" aria-hidden="true">
+              <rect x="2" y="0" width="2" height="11"/>
+              <rect x="0" y="2" width="11" height="2"/>
+              <rect x="10" y="2" width="2" height="12"/>
+              <rect x="2" y="10" width="12" height="2"/>
+            </svg>
+            CROP <span class="cjk">图片裁剪</span>
+          </h3>
           <button class="nes-btn is-error crop-close" @click="closeCropModal">×</button>
         </div>
 
-        <div v-if="!cropImage" class="crop-upload-zone" @click="cropFileInput && cropFileInput.click()">
+        <div v-if="!cropImage" class="crop-upload-zone" :class="{ dragging: cropDragOver }"
+             @click="cropFileInput && cropFileInput.click()"
+             @dragover.prevent="onCropDragOver" @dragleave.prevent="onCropDragLeave" @drop.prevent="onCropDrop">
           <input type="file" accept="image/*" @change="handleCropImageUpload" ref="cropFileInput" style="display:none">
           <button class="nes-btn is-primary" @click.stop="cropFileInput && cropFileInput.click()"><span class="cjk">选择图片</span></button>
-          <p>点击选择要裁剪的图片</p>
+          <p>点击选择要裁剪的图片<br>或将图片拖拽到此处上传</p>
         </div>
 
         <template v-else>
@@ -879,7 +1004,18 @@
 
         <div class="crop-modal-footer">
           <button class="nes-btn" @click="closeCropModal"><span class="cjk">取消</span></button>
-          <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">✔ <span class="cjk">裁剪并保存</span></button>
+          <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="2" y="7" width="3" height="3"/>
+                <rect x="4" y="9" width="3" height="3"/>
+                <rect x="6" y="7" width="3" height="3"/>
+                <rect x="8" y="5" width="3" height="3"/>
+                <rect x="10" y="3" width="3" height="3"/>
+              </svg>
+              <span class="cjk">裁剪并保存</span>
+            </span>
+          </button>
         </div>
       </div>
     </div>
@@ -935,6 +1071,7 @@
         const cropDragStart = ref({ mouseX: 0, mouseY: 0, rect: { x: 0, y: 0, w: 0, h: 0 } });
         const cropFlipH = ref(false);
         const cropFlipV = ref(false);
+        const cropDragOver = ref(false);
 
         const cropTransform = computed(() => {
           const parts = [];
@@ -1390,6 +1527,7 @@
           cropDragMode.value = null;
           cropFlipH.value = false;
           cropFlipV.value = false;
+          cropDragOver.value = false;
         };
 
         /** 关闭裁剪弹窗 */
@@ -1436,9 +1574,8 @@
           cropRect.value = { x, y, w, h };
         };
 
-        /** 上传裁剪图片 */
-        const handleCropImageUpload = (event) => {
-          const file = event.target.files[0];
+        /** 读取裁剪用的图片文件（选择与拖拽共用） */
+        const processCropFile = (file) => {
           if (!file) return;
 
           const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp', 'image/gif'];
@@ -1465,6 +1602,29 @@
             img.src = e.target.result;
           };
           reader.readAsDataURL(file);
+        };
+
+        /** 裁剪弹窗：选择文件上传 */
+        const handleCropImageUpload = (event) => {
+          processCropFile(event.target.files[0]);
+        };
+
+        /** 裁剪弹窗：拖拽进入上传区 */
+        const onCropDragOver = () => {
+          cropDragOver.value = true;
+        };
+
+        /** 裁剪弹窗：拖拽离开上传区（移到子元素上时不算离开） */
+        const onCropDragLeave = (event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            cropDragOver.value = false;
+          }
+        };
+
+        /** 裁剪弹窗：拖拽释放上传 */
+        const onCropDrop = (event) => {
+          cropDragOver.value = false;
+          processCropFile(event.dataTransfer.files[0]);
         };
 
         /** 设置预设比例 */
@@ -1729,6 +1889,25 @@
           closeCropModal();
         };
 
+        /**
+         * 尺寸输入：只接受整数，输入小数时向下取整后回填
+         * @param {Event} event - 输入事件
+         * @param {'width'|'height'} dimension - 目标维度
+         */
+        const handleSizeInput = (event, dimension) => {
+          const raw = event.target.value;
+          if (raw === '') return; // 允许清空，方便重新输入
+          const value = Math.floor(Number(raw));
+          if (!Number.isFinite(value)) return;
+          const target = dimension === 'width' ? pixelWidth : pixelHeight;
+          target.value = value;
+          // 直接回填 DOM：若 ref 值未变化，:value 绑定不会触发 DOM 更新
+          if (event.target.value !== String(value)) {
+            event.target.value = String(value);
+          }
+          generatePixelArt();
+        };
+
         /** 监听尺寸变化，重新渲染画布 */
         watch([pixelWidth, pixelHeight, cellSize], () => {
           if (pixelData.value) {
@@ -1785,6 +1964,7 @@
           imageInfo,
           imageRatio,
           generatePixelArt,
+          handleSizeInput,
           panelOpen,
           pixelFont,
           flipH,
@@ -1826,6 +2006,10 @@
           openCropModal,
           closeCropModal,
           handleCropImageUpload,
+          onCropDragOver,
+          onCropDragLeave,
+          onCropDrop,
+          cropDragOver,
           setPresetRatio,
           setCropType,
           applyCustomRatio,
