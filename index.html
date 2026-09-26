@@ -25,6 +25,14 @@
       --px-red: #e76e55;
       --px-blue: #209cee;
       --px-border: #f8f8f8;
+      --px-font: 'Press Start 2P', 'Microsoft YaHei', monospace, sans-serif;
+      --px-font-plain: 'Microsoft YaHei', 'PingFang SC', monospace, sans-serif;
+      --px-cjk: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    }
+
+    /* 关闭像素字体时全局回退普通字体 */
+    body.no-pixel-font {
+      --px-font: var(--px-font-plain);
     }
 
     * {
@@ -33,7 +41,7 @@
       box-sizing: border-box;
     }
     html, body {
-      font-family: 'Press Start 2P', 'Microsoft YaHei', monospace, sans-serif;
+      font-family: var(--px-font-plain);
       background: var(--px-bg) !important;
       color: var(--px-ink);
       width: 100%;
@@ -46,6 +54,24 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+      font-family: var(--px-font);
+    }
+
+    /* 中文统一用雅黑，并校正与像素字体的基线错位 */
+    .cjk {
+      font-family: var(--px-cjk);
+      font-size: inherit;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    /* Press Start 2P 的字形整体落在基线之上，中文需上移才与英文视觉对齐 */
+    body:not(.no-pixel-font) .cjk {
+      vertical-align: 0.22em;
+    }
+    /* 关闭像素字体时中英文同为雅黑，无需补偿 */
+    body.no-pixel-font .cjk {
+      letter-spacing: 0;
+      vertical-align: 0;
     }
 
     /* ============ 像素滚动条 ============ */
@@ -83,7 +109,7 @@
       letter-spacing: -4px;
     }
     .title-text {
-      font-family: 'Press Start 2P', monospace;
+      font-family: var(--px-font);
       font-size: 16px;
       color: var(--px-cyan);
       text-shadow: 3px 3px 0 #003a4a;
@@ -97,6 +123,14 @@
       font-size: 12px;
       color: #888;
       margin-left: auto;
+    }
+    .title-controls {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-shrink: 0;
+      padding-left: 8px;
+      border-left: 4px solid #2a2a3f;
     }
 
     /* ============ 主布局 ============ */
@@ -123,9 +157,21 @@
       padding: 18px 16px;
       overflow-y: auto;
       overflow-x: hidden;
+      transition: width 0.18s steps(4), margin 0.18s steps(4), padding 0.18s steps(4), opacity 0.18s steps(4);
+    }
+    .side-panel.collapsed {
+      width: 0;
+      margin-left: 0;
+      padding-left: 0;
+      padding-right: 0;
+      border-width: 0;
+      box-shadow: none;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
     }
     .panel-title {
-      font-family: 'Press Start 2P', monospace;
+      font-family: var(--px-font);
       font-size: 12px;
       color: var(--px-yellow);
       padding-bottom: 12px;
@@ -321,7 +367,7 @@
       color: var(--px-red);
     }
     .info-title {
-      font-family: 'Press Start 2P', monospace;
+      font-family: var(--px-font);
       font-weight: bold;
       font-size: 10px;
       margin-bottom: 4px;
@@ -338,7 +384,7 @@
       color: #fff;
     }
     .color-code {
-      font-family: 'Press Start 2P', monospace;
+      font-family: var(--px-font);
       font-size: 10px;
     }
     .color-swatch {
@@ -427,7 +473,7 @@
     .crop-modal-header h3 {
       color: var(--px-yellow);
       font-size: 13px;
-      font-family: 'Press Start 2P', monospace;
+      font-family: var(--px-font);
       margin: 0;
       letter-spacing: 1px;
     }
@@ -504,6 +550,14 @@
     .px-switch-item.on .px-switch::after {
       left: calc(100% - 13px);
       background: #fff;
+    }
+    .px-switch-item.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    /* 左侧面板内的开关行 */
+    .switch-row.compact {
+      gap: 18px;
     }
 
     /* ============ 裁剪类型选项卡 ============ */
@@ -606,23 +660,35 @@
     <header class="title-bar">
       <span class="title-logo">▚▞</span>
       <h1 class="title-text">PERLER BEADS <span class="title-accent">HELPER</span></h1>
-      <span class="title-sub">拼豆辅助工具 v1.0</span>
+      <span class="title-sub"><span class="cjk">拼豆辅助工具</span> v1.0</span>
+      <div class="title-controls">
+        <label class="px-switch-item" :class="{ on: panelOpen }" title="展开 / 收起左侧操作面板">
+          <input type="checkbox" v-model="panelOpen">
+          <span class="px-switch"></span>
+          <span class="cjk">面板</span>
+        </label>
+        <label class="px-switch-item" :class="{ on: pixelFont }" title="开启 / 关闭像素字体">
+          <input type="checkbox" v-model="pixelFont">
+          <span class="px-switch"></span>
+          <span class="cjk">像素字体</span>
+        </label>
+      </div>
     </header>
 
     <main class="main-area">
       <!-- 左侧控制台 -->
-      <aside class="side-panel px-panel">
-        <h2 class="panel-title">▸ CONSOLE 控制台</h2>
+      <aside class="side-panel px-panel" :class="{ collapsed: !panelOpen }">
+        <h2 class="panel-title">▸ CONSOLE <span class="cjk">控制台</span></h2>
 
         <div class="control-group">
-          <label class="px-label">▸ 图片 IMAGE</label>
+          <label class="px-label">▸ IMAGE <span class="cjk">图片</span></label>
           <input type="file" accept="image/*" @change="handleImageUpload" ref="fileInput" style="display:none">
-          <button class="nes-btn is-primary full-btn" @click="triggerFileInput">选择图片</button>
+          <button class="nes-btn is-primary full-btn" @click="triggerFileInput"><span class="cjk">选择图片</span></button>
           <div v-if="imageInfo" class="image-info">{{ imageRatio }}</div>
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ 尺寸 SIZE (像素点)</label>
+          <label class="px-label">▸ SIZE <span class="cjk">尺寸</span> (<span class="cjk">像素点</span>)</label>
           <div class="input-row">
             <input type="number" class="px-input" v-model.number="pixelWidth" min="5" max="200" @input="generatePixelArt">
             <span class="px-x">×</span>
@@ -631,27 +697,35 @@
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ 颜色数量 COLORS: {{ colorCount }}</label>
+          <label class="px-label">▸ COLORS <span class="cjk">颜色数量</span>: {{ colorCount }}</label>
           <input type="range" class="px-range" v-model.number="colorCount" min="2" max="256" step="1" @input="applyColorQuantization">
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ 翻转 FLIP</label>
-          <div class="btn-row">
-            <button class="nes-btn" @click="flipHorizontal" :disabled="!originalImage">⇋ 水平</button>
-            <button class="nes-btn" @click="flipVertical" :disabled="!originalImage">⇅ 垂直</button>
+          <label class="px-label">▸ FLIP <span class="cjk">翻转</span></label>
+          <div class="switch-row compact">
+            <label class="px-switch-item" :class="{ on: flipH, disabled: !originalImage }">
+              <input type="checkbox" v-model="flipH" :disabled="!originalImage">
+              <span class="px-switch"></span>
+              <span class="cjk">水平</span>
+            </label>
+            <label class="px-switch-item" :class="{ on: flipV, disabled: !originalImage }">
+              <input type="checkbox" v-model="flipV" :disabled="!originalImage">
+              <span class="px-switch"></span>
+              <span class="cjk">垂直</span>
+            </label>
           </div>
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ 缩放 ZOOM: {{ Math.round(scale * 100) }}%</label>
+          <label class="px-label">▸ ZOOM <span class="cjk">缩放</span>: {{ Math.round(scale * 100) }}%</label>
           <input type="range" class="px-range" v-model.number="scale" min="0.2" max="5" step="0.1">
         </div>
 
         <div class="control-group btn-stack">
-          <button class="nes-btn is-warning full-btn" @click="openCropModal">✂ 图片裁剪</button>
-          <button class="nes-btn full-btn" @click="resetPosition" :disabled="!originalImage">⌖ 重置位置</button>
-          <button class="nes-btn is-success full-btn" @click="downloadPixelArt" :disabled="!pixelData">⬇ 下载像素画</button>
+          <button class="nes-btn is-warning full-btn" @click="openCropModal">✂ <span class="cjk">图片裁剪</span></button>
+          <button class="nes-btn full-btn" @click="resetPosition" :disabled="!originalImage">⌖ <span class="cjk">重置位置</span></button>
+          <button class="nes-btn is-success full-btn" @click="downloadPixelArt" :disabled="!pixelData">⬇ <span class="cjk">下载像素画</span></button>
         </div>
       </aside>
 
@@ -660,7 +734,7 @@
         <div v-if="!originalImage" class="empty-state" :class="{ dragging: isDraggingOver }" @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="handleDrop">
           <div class="icon">▚▞▚</div>
           <p>点击此处选择图片<br>或将图片拖拽到此处上传</p>
-          <p class="tip">支持: JPEG / PNG / WebP / AVIF / BMP / GIF | 最大 20MB</p>
+          <p class="tip"><span class="cjk">支持</span>: JPEG / PNG / WebP / AVIF / BMP / GIF | <span class="cjk">最大</span> 20MB</p>
         </div>
 
         <div v-else
@@ -705,7 +779,7 @@
 
         <!-- 悬浮信息卡片 -->
         <div class="info-card hovered-info" v-if="hoveredPixel && hoveredPixelColor">
-          <div class="info-title">HOVER 悬浮</div>
+          <div class="info-title">HOVER <span class="cjk">悬浮</span></div>
           <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
           <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
           <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }},{{ hoveredPixelColor.g }},{{ hoveredPixelColor.b }}</span></div>
@@ -714,7 +788,7 @@
 
         <!-- 选中信息卡片 -->
         <div class="info-card selected-info" v-if="selectedPixel && selectedPixelColor">
-          <div class="info-title">LOCK 选中</div>
+          <div class="info-title">LOCK <span class="cjk">选中</span></div>
           <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> Y: <span>{{ selectedPixel.y + 1 }}</span></div>
           <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
           <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }},{{ selectedPixelColor.g }},{{ selectedPixelColor.b }}</span></div>
@@ -723,7 +797,7 @@
 
         <div class="zoom-info">
           ZOOM {{ Math.round(scale * 100) }}% | {{ pixelWidth }} × {{ pixelHeight }}<br>
-          滚轮缩放 · 拖动移动
+          <span class="cjk">滚轮缩放</span> · <span class="cjk">拖动移动</span>
         </div>
       </section>
     </main>
@@ -732,13 +806,13 @@
     <div v-if="cropModalOpen" class="crop-modal-overlay" @mousedown.self="closeCropModal">
       <div class="crop-modal px-panel">
         <div class="crop-modal-header">
-          <h3>✂ CROP 图片裁剪</h3>
+          <h3>✂ CROP <span class="cjk">图片裁剪</span></h3>
           <button class="nes-btn is-error crop-close" @click="closeCropModal">×</button>
         </div>
 
         <div v-if="!cropImage" class="crop-upload-zone" @click="cropFileInput && cropFileInput.click()">
           <input type="file" accept="image/*" @change="handleCropImageUpload" ref="cropFileInput" style="display:none">
-          <button class="nes-btn is-primary" @click.stop="cropFileInput && cropFileInput.click()">选择图片</button>
+          <button class="nes-btn is-primary" @click.stop="cropFileInput && cropFileInput.click()"><span class="cjk">选择图片</span></button>
           <p>点击选择要裁剪的图片</p>
         </div>
 
@@ -747,23 +821,23 @@
             <label class="px-switch-item" :class="{ on: cropFlipH }">
               <input type="checkbox" v-model="cropFlipH">
               <span class="px-switch"></span>
-              水平翻转 H-FLIP
+              <span class="cjk">水平翻转</span> H-FLIP
             </label>
             <label class="px-switch-item" :class="{ on: cropFlipV }">
               <input type="checkbox" v-model="cropFlipV">
               <span class="px-switch"></span>
-              垂直翻转 V-FLIP
+              <span class="cjk">垂直翻转</span> V-FLIP
             </label>
           </div>
 
           <div class="crop-type-tabs">
-            <button class="nes-btn" :class="{ 'is-primary': cropType === 'free' }" @click="setCropType('free')">自由</button>
-            <button class="nes-btn" :class="{ 'is-primary': cropType === 'ratio' }" @click="setCropType('ratio')">宽高比</button>
-            <button class="nes-btn" :class="{ 'is-primary': cropType === 'pixel' }" @click="setCropType('pixel')">像素比</button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'free' }" @click="setCropType('free')"><span class="cjk">自由</span></button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'ratio' }" @click="setCropType('ratio')"><span class="cjk">宽高比</span></button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'pixel' }" @click="setCropType('pixel')"><span class="cjk">像素比</span></button>
           </div>
 
           <div class="crop-ratio-section" v-if="cropType === 'free'">
-            <p class="crop-hint">▸ 拖动裁剪框边角或边缘手柄，自由调整宽高</p>
+            <p class="crop-hint">▸ <span class="cjk">拖动裁剪框边角或边缘手柄，自由调整宽高</span></p>
           </div>
 
           <div class="crop-ratio-section" v-else-if="cropType === 'ratio'">
@@ -773,7 +847,7 @@
                       @click="setPresetRatio(p)">{{ p.label }}</button>
             </div>
             <div class="ratio-group">
-              <label>自定义比例</label>
+              <label class="cjk">自定义比例</label>
               <input type="number" class="px-input small" v-model.number="customRatioW" min="1" @input="applyCustomRatio">
               <span>:</span>
               <input type="number" class="px-input small" v-model.number="customRatioH" min="1" @input="applyCustomRatio">
@@ -782,12 +856,12 @@
 
           <div class="crop-ratio-section" v-else-if="cropType === 'pixel'">
             <div class="ratio-group">
-              <label>宽</label>
+              <label class="cjk">宽</label>
               <input type="number" class="px-input small" v-model.number="customPxW" min="1" @input="applyCustomPixels">
               <span>×</span>
-              <label>高</label>
+              <label class="cjk">高</label>
               <input type="number" class="px-input small" v-model.number="customPxH" min="1" @input="applyCustomPixels">
-              <span>像素</span>
+              <span class="cjk">像素</span>
             </div>
           </div>
 
@@ -804,8 +878,8 @@
         </template>
 
         <div class="crop-modal-footer">
-          <button class="nes-btn" @click="closeCropModal">取消</button>
-          <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">✔ 裁剪并保存</button>
+          <button class="nes-btn" @click="closeCropModal"><span class="cjk">取消</span></button>
+          <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">✔ <span class="cjk">裁剪并保存</span></button>
         </div>
       </div>
     </div>
@@ -836,6 +910,12 @@
         const offsetY = ref(0);
         const lastMouseX = ref(0);
         const lastMouseY = ref(0);
+
+        // 界面开关
+        const panelOpen = ref(true);   // 左侧操作面板展开状态，默认展开
+        const pixelFont = ref(true);   // 是否启用像素字体，默认启用
+        const flipH = ref(false);      // 水平翻转
+        const flipV = ref(false);      // 垂直翻转
 
         // 图片裁剪弹窗
         const cropModalOpen = ref(false);
@@ -1027,72 +1107,8 @@
         };
 
         /**
-         * 水平翻转像素图
-         * 将像素数据左右镜像翻转，并重新应用颜色量化
-         */
-        const flipHorizontal = () => {
-          if (!pixelData.value) return;
-
-          const data = pixelData.value.data;
-          const newData = new Uint8ClampedArray(data.length);
-          const w = pixelWidth.value;
-          const h = pixelHeight.value;
-
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const srcIdx = (y * w + x) * 4;
-              const dstIdx = (y * w + (w - 1 - x)) * 4;
-              newData[dstIdx] = data[srcIdx];
-              newData[dstIdx + 1] = data[srcIdx + 1];
-              newData[dstIdx + 2] = data[srcIdx + 2];
-              newData[dstIdx + 3] = data[srcIdx + 3];
-            }
-          }
-
-          pixelData.value = new ImageData(newData, w, h);
-          originalPixelData = pixelData.value;
-          if (colorCount.value < 256) {
-            applyColorQuantization();
-          } else {
-            renderCanvas();
-          }
-        };
-
-        /**
-         * 垂直翻转像素图
-         * 将像素数据上下镜像翻转，并重新应用颜色量化
-         */
-        const flipVertical = () => {
-          if (!pixelData.value) return;
-
-          const data = pixelData.value.data;
-          const newData = new Uint8ClampedArray(data.length);
-          const w = pixelWidth.value;
-          const h = pixelHeight.value;
-
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const srcIdx = (y * w + x) * 4;
-              const dstIdx = ((h - 1 - y) * w + x) * 4;
-              newData[dstIdx] = data[srcIdx];
-              newData[dstIdx + 1] = data[srcIdx + 1];
-              newData[dstIdx + 2] = data[srcIdx + 2];
-              newData[dstIdx + 3] = data[srcIdx + 3];
-            }
-          }
-
-          pixelData.value = new ImageData(newData, w, h);
-          originalPixelData = pixelData.value;
-          if (colorCount.value < 256) {
-            applyColorQuantization();
-          } else {
-            renderCanvas();
-          }
-        };
-
-        /**
          * 根据设置的宽高重新采样原始图片生成像素画
-         * 支持按比例裁剪图片以适应目标尺寸
+         * 支持按比例裁剪图片以适应目标尺寸，并按开关状态应用水平/垂直翻转
          */
         const generatePixelArt = () => {
           if (!originalImage.value) return;
@@ -1101,11 +1117,13 @@
           const tempCanvas = document.createElement('canvas');
           const tempCtx = tempCanvas.getContext('2d');
 
-          tempCanvas.width = pixelWidth.value;
-          tempCanvas.height = pixelHeight.value;
+          const w = pixelWidth.value;
+          const h = pixelHeight.value;
+          tempCanvas.width = w;
+          tempCanvas.height = h;
 
           const imgAspect = img.width / img.height;
-          const canvasAspect = pixelWidth.value / pixelHeight.value;
+          const canvasAspect = w / h;
 
           let drawX = 0, drawY = 0;
           let drawWidth = img.width;
@@ -1119,9 +1137,16 @@
             drawY = (img.height - drawHeight) / 2;
           }
 
-          tempCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight, 0, 0, pixelWidth.value, pixelHeight.value);
+          // 以画布中心为轴镜像，保证像素对齐
+          if (flipH.value || flipV.value) {
+            tempCtx.translate(w / 2, h / 2);
+            tempCtx.scale(flipH.value ? -1 : 1, flipV.value ? -1 : 1);
+            tempCtx.translate(-w / 2, -h / 2);
+          }
 
-          pixelData.value = tempCtx.getImageData(0, 0, pixelWidth.value, pixelHeight.value);
+          tempCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight, 0, 0, w, h);
+
+          pixelData.value = tempCtx.getImageData(0, 0, w, h);
           originalPixelData = pixelData.value;
 
           if (colorCount.value < 256) {
@@ -1188,7 +1213,9 @@
           ctx.stroke();
 
           ctx.fillStyle = '#00d9ff';
-          ctx.font = '9px "Press Start 2P", monospace';
+          ctx.font = pixelFont.value
+            ? '9px "Press Start 2P", monospace'
+            : '10px "Microsoft YaHei", sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
 
@@ -1709,6 +1736,21 @@
           }
         });
 
+        /** 监听翻转开关，重新生成像素画 */
+        watch([flipH, flipV], () => {
+          if (originalImage.value) {
+            generatePixelArt();
+          }
+        });
+
+        /** 监听像素字体开关，切换全局字体并重绘标尺 */
+        watch(pixelFont, (enabled) => {
+          document.body.classList.toggle('no-pixel-font', !enabled);
+          if (pixelData.value) {
+            renderCanvas();
+          }
+        }, { immediate: true });
+
         /** 像素字体加载完成后重绘画布标尺，避免 fallback 字体残留 */
         if (document.fonts && document.fonts.ready) {
           document.fonts.ready.then(() => {
@@ -1743,8 +1785,10 @@
           imageInfo,
           imageRatio,
           generatePixelArt,
-          flipHorizontal,
-          flipVertical,
+          panelOpen,
+          pixelFont,
+          flipH,
+          flipV,
           colorCount,
           applyColorQuantization,
           handleWheel,
