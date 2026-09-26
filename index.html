@@ -4,24 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>拼豆辅助工具</title>
-  <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3.3/dist/vue.global.js"></script> -->
+  <link rel="stylesheet" href="./static/nes.min.css">
   <script src="./static/vue.3.5.38.js"></script>
   <style>
+    @font-face {
+      font-family: 'Press Start 2P';
+      src: url('./static/press-start-2p.woff2') format('woff2');
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    :root {
+      --px-bg: #0d0d17;
+      --px-panel: #1b1b2f;
+      --px-panel-dark: #14141f;
+      --px-ink: #f8f8f8;
+      --px-cyan: #00d9ff;
+      --px-yellow: #f7d51d;
+      --px-green: #92cc41;
+      --px-red: #e76e55;
+      --px-blue: #209cee;
+      --px-border: #f8f8f8;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     html, body {
-      font-family: 'Microsoft YaHei', sans-serif;
-      background: #1a1a2e;
-      color: #eee;
+      font-family: 'Press Start 2P', 'Microsoft YaHei', monospace, sans-serif;
+      background: var(--px-bg) !important;
+      color: var(--px-ink);
       width: 100%;
       height: 100%;
-      margin: 0;
-      padding: 0;
       overflow: hidden;
+      font-size: 12px;
     }
     #app {
       width: 100%;
@@ -29,100 +47,212 @@
       display: flex;
       flex-direction: column;
     }
+
+    /* ============ 像素滚动条 ============ */
+    ::-webkit-scrollbar {
+      width: 14px;
+      height: 14px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--px-panel-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4a4a6a;
+      border: 3px solid var(--px-panel-dark);
+      box-shadow: inset 0 0 0 1px var(--px-border);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--px-cyan);
+    }
+
+    /* ============ 标题栏 ============ */
+    .title-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 20px;
+      background: #000;
+      border-bottom: 4px solid var(--px-border);
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .title-logo {
+      font-size: 20px;
+      color: var(--px-cyan);
+      text-shadow: 2px 0 0 var(--px-red), -2px 0 0 var(--px-blue);
+      letter-spacing: -4px;
+    }
+    .title-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 16px;
+      color: var(--px-cyan);
+      text-shadow: 3px 3px 0 #003a4a;
+      letter-spacing: 1px;
+    }
+    .title-accent {
+      color: var(--px-yellow);
+      text-shadow: 3px 3px 0 #4a3c00;
+    }
+    .title-sub {
+      font-size: 12px;
+      color: #888;
+      margin-left: auto;
+    }
+
+    /* ============ 主布局 ============ */
+    .main-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ============ 像素面板 ============ */
+    .px-panel {
+      background: var(--px-panel);
+      border: 4px solid var(--px-border);
+      box-shadow:
+        inset -4px -4px 0 0 rgba(0, 0, 0, 0.35),
+        inset 4px 4px 0 0 rgba(255, 255, 255, 0.06),
+        8px 8px 0 0 rgba(0, 0, 0, 0.45);
+    }
+
+    .side-panel {
+      width: 300px;
+      flex-shrink: 0;
+      margin: 14px 0 14px 14px;
+      padding: 18px 16px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .panel-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: var(--px-yellow);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 4px dashed rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+
+    /* ============ 控件组 ============ */
     .control-group {
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      margin-bottom: 15px;
+      gap: 8px;
+      margin-bottom: 18px;
     }
-    .control-group label {
-      font-size: 14px;
-      color: #aaa;
-    }
-    .control-group input[type="file"] {
-      background: #0f3460;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      color: #fff;
-      cursor: pointer;
-      width: 100%;
-    }
-    .control-group input[type="number"] {
-      background: #0f3460;
-      border: 1px solid #00d9ff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      color: #fff;
-      width: 100%;
-      font-size: 16px;
-    }
-    .control-group input[type="number"]:focus {
-      outline: none;
-      border-color: #00ff88;
+    .px-label {
+      font-size: 11px;
+      color: #9a9ab8;
+      letter-spacing: 1px;
     }
     .image-info {
-      margin-top: 6px;
-      font-size: 12px;
-      color: #00d9ff;
+      font-size: 11px;
+      color: var(--px-cyan);
+      line-height: 1.6;
     }
-    .control-group input[type="range"] {
+
+    .px-input {
+      background: var(--px-panel-dark);
+      color: var(--px-ink);
+      border: 4px solid var(--px-border);
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 12px;
       width: 100%;
-      height: 6px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: linear-gradient(90deg, #0f3460, #00d9ff, #0f3460);
-      border-radius: 3px;
-      cursor: pointer;
+      box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.5);
     }
-    .control-group input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 217, 255, 0.5);
-      transition: transform 0.2s;
+    .px-input:focus {
+      outline: none;
+      border-color: var(--px-cyan);
     }
-    .control-group input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
+    .px-input.small {
+      width: 64px;
+      padding: 5px 6px;
+      font-size: 11px;
     }
-    .btn {
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+    .px-x {
+      color: var(--px-cyan);
+      font-size: 14px;
     }
-    .btn:active {
-      transform: translateY(0);
+
+    /* ============ NES 按钮微调 ============ */
+    .nes-btn {
+      font-size: 11px;
+      line-height: 1.5;
     }
-    .btn-secondary {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+    .full-btn {
+      width: 100%;
     }
-    .btn-small {
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-    .btn-group {
+    .btn-row {
       display: flex;
       gap: 8px;
     }
-    .preview-container {
-      position: relative;
+    .btn-row .nes-btn {
+      flex: 1;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+    .btn-stack {
+      gap: 12px;
+      padding-top: 6px;
+      border-top: 4px dashed rgba(255, 255, 255, 0.25);
+    }
+
+    /* ============ 像素滑块 ============ */
+    .px-range {
+      -webkit-appearance: none;
+      appearance: none;
       width: 100%;
-      height: 100%;
-      background: #16213e;
+      height: 16px;
+      background: var(--px-panel-dark);
+      border: 4px solid var(--px-border);
+      cursor: pointer;
+      box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+    }
+    .px-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 24px;
+      margin-top: -2px;
+      background: var(--px-cyan);
+      border: 2px solid var(--px-border);
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+    }
+    .px-range::-moz-range-thumb {
+      width: 14px;
+      height: 24px;
+      background: var(--px-cyan);
+      border: 2px solid var(--px-border);
+      border-radius: 0;
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+    }
+    .px-range:active::-webkit-slider-thumb {
+      background: var(--px-green);
+    }
+    .px-range:active::-moz-range-thumb {
+      background: var(--px-green);
+    }
+
+    /* ============ 预览区 ============ */
+    .preview-area {
+      position: relative;
+      flex: 1;
+      margin: 14px;
+      border: 4px solid var(--px-border);
+      box-shadow:
+        inset 0 0 0 4px #000,
+        8px 8px 0 0 rgba(0, 0, 0, 0.45);
+      background:
+        repeating-conic-gradient(#16161f 0% 25%, #0d0d17 0% 50%) 0 0 / 24px 24px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -130,15 +260,20 @@
     }
     .canvas-wrapper {
       position: relative;
-      background: #0f3460;
-      border-radius: 4px;
-      overflow: visible;
+      background: transparent;
+    }
+    .canvas-wrapper.dragging {
+      cursor: grabbing;
+    }
+    .canvas-wrapper:not(.dragging) {
+      cursor: grab;
     }
     .main-canvas {
       image-rendering: pixelated;
       cursor: crosshair;
-      border: none;
       display: block;
+      border: 4px solid var(--px-border);
+      box-shadow: 8px 8px 0 0 rgba(0, 0, 0, 0.5);
     }
     .highlight-overlay {
       position: absolute;
@@ -152,312 +287,280 @@
       background: rgba(0, 217, 255, 0.3);
     }
     .highlight-row.hover {
-      background: rgba(0, 255, 136, 0.15);
+      background: rgba(146, 204, 65, 0.18);
       z-index: 5;
     }
     .highlight-col.hover {
-      background: rgba(0, 255, 136, 0.15);
+      background: rgba(146, 204, 65, 0.18);
       z-index: 5;
     }
-    .position-info {
-      position: fixed;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 12px 15px;
-      border-radius: 8px;
-      color: #00d9ff;
-      font-size: 13px;
+
+    /* ============ 信息卡片 ============ */
+    .info-card {
+      position: absolute;
+      background: var(--px-panel-dark);
+      border: 4px solid var(--px-cyan);
+      box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 0.5);
+      padding: 10px 12px;
+      color: var(--px-cyan);
+      font-size: 11px;
       z-index: 100;
       display: flex;
       flex-direction: column;
       gap: 6px;
+      line-height: 1.5;
     }
     .hovered-info {
-      top: 20px;
-      left: 20px;
-      border: 1px solid #00d9ff;
+      top: 16px;
+      left: 16px;
     }
     .selected-info {
-      top: 20px;
-      left: 220px;
-      border: 1px solid #ff6b6b;
+      top: 16px;
+      left: 236px;
+      border-color: var(--px-red);
+      color: var(--px-red);
     }
     .info-title {
+      font-family: 'Press Start 2P', monospace;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 10px;
       margin-bottom: 4px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-    .hovered-info .info-title {
-      color: #00d9ff;
-    }
-    .selected-info .info-title {
-      color: #ff6b6b;
+      padding-bottom: 6px;
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
+      letter-spacing: 1px;
     }
     .position-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      color: #aaa;
     }
-    .position-info span {
+    .info-card span {
       color: #fff;
     }
     .color-code {
-      font-family: monospace;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
     }
     .color-swatch {
-      width: 50px;
-      height: 50px;
-      border-radius: 4px;
-      margin-top: 5px;
-    }
-    .hovered-info .color-swatch {
-      border: 2px solid #00d9ff;
-    }
-    .selected-info .color-swatch {
-      border: 2px solid #ff6b6b;
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--px-border);
+      margin-top: 4px;
     }
     .zoom-info {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 10px 15px;
-      border-radius: 8px;
-      color: #00d9ff;
-      font-size: 14px;
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: var(--px-panel-dark);
+      border: 4px solid var(--px-border);
+      box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 0.5);
+      padding: 8px 12px;
+      color: var(--px-cyan);
+      font-size: 10px;
+      line-height: 1.6;
     }
+
+    /* ============ 空状态 ============ */
     .empty-state {
       text-align: center;
       padding: 60px;
       color: #666;
       cursor: pointer;
-      border: 3px dashed #333;
-      border-radius: 12px;
-      transition: all 0.3s ease;
+      border: 4px dashed #444;
+      transition: all 0.15s;
       width: 80%;
-      max-width: 500px;
+      max-width: 520px;
+      background: rgba(0, 0, 0, 0.3);
+      user-select: none;
     }
     .empty-state:hover {
-      border-color: #00d9ff;
+      border-color: var(--px-cyan);
       color: #aaa;
       background: rgba(0, 217, 255, 0.05);
     }
     .empty-state.dragging {
-      border-color: #00ff88;
-      color: #00ff88;
-      background: rgba(0, 255, 136, 0.1);
+      border-color: var(--px-green);
+      color: var(--px-green);
+      background: rgba(146, 204, 65, 0.1);
+    }
+    .empty-state .icon {
+      font-size: 40px;
+      letter-spacing: -6px;
     }
     .empty-state p {
-      margin-top: 10px;
-      font-size: 16px;
+      margin-top: 14px;
+      font-size: 12px;
+      line-height: 1.8;
     }
-    .drawer-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 100;
+    .empty-state .tip {
+      font-size: 10px;
+      color: #666;
     }
-    .drawer-toggle {
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border: none;
-      border-radius: 50%;
-      color: #fff;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .drawer-toggle:hover {
-      transform: rotate(90deg);
-      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.6);
-    }
-    .drawer-content {
-      position: absolute;
-      top: 60px;
-      right: 0;
-      width: 280px;
-      background: #16213e;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-      transform: translateX(120%);
-      opacity: 0;
-      transition: transform 0.3s, opacity 0.3s;
-    }
-    .drawer-content.open {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    .drawer-content h3 {
-      color: #00d9ff;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #0f3460;
-    }
-    .drawer-content .btn {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    .canvas-wrapper.dragging {
-      cursor: grabbing;
-    }
-    .canvas-wrapper:not(.dragging) {
-      cursor: grab;
-    }
+
+    /* ============ 裁剪弹窗 ============ */
     .crop-modal-overlay {
       position: fixed;
       inset: 0;
       z-index: 200;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       display: flex;
       justify-content: center;
       align-items: center;
     }
     .crop-modal {
-      background: #16213e;
-      border-radius: 12px;
+      width: 92%;
+      max-width: 880px;
+      max-height: 92vh;
+      overflow-y: auto;
       padding: 20px;
-      width: 90%;
-      max-width: 860px;
-      max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
     }
     .crop-modal-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #0f3460;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 4px dashed rgba(255, 255, 255, 0.25);
     }
     .crop-modal-header h3 {
-      color: #00d9ff;
-      font-size: 18px;
+      color: var(--px-yellow);
+      font-size: 13px;
+      font-family: 'Press Start 2P', monospace;
       margin: 0;
+      letter-spacing: 1px;
     }
     .crop-close {
-      width: 30px;
-      height: 30px;
-      background: #0f3460;
-      border: 1px solid #00d9ff;
-      border-radius: 6px;
-      color: #00d9ff;
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .crop-close:hover {
-      transform: rotate(90deg);
+      margin-left: auto;
+      width: 34px;
+      height: 34px;
+      padding: 0 !important;
+      font-size: 14px !important;
+      line-height: 1 !important;
     }
     .crop-upload-zone {
-      border: 3px dashed #333;
-      border-radius: 12px;
-      padding: 40px;
+      border: 4px dashed #444;
+      padding: 44px;
       text-align: center;
       color: #666;
       cursor: pointer;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .crop-upload-zone:hover {
+      border-color: var(--px-cyan);
+      color: #aaa;
     }
     .crop-upload-zone p {
-      margin-top: 10px;
-      font-size: 14px;
+      margin-top: 14px;
+      font-size: 11px;
+      line-height: 1.8;
     }
-    .crop-upload-zone input[type="file"] {
-      background: #0f3460;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      color: #fff;
+
+    /* ============ 像素开关 ============ */
+    .switch-row {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+    .px-switch-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       cursor: pointer;
-      width: 100%;
+      font-size: 11px;
+      color: #9a9ab8;
+      user-select: none;
     }
+    .px-switch-item input {
+      display: none;
+    }
+    .px-switch {
+      position: relative;
+      width: 44px;
+      height: 22px;
+      background: var(--px-panel-dark);
+      border: 4px solid var(--px-border);
+      box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+      flex-shrink: 0;
+    }
+    .px-switch::after {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: 12px;
+      height: 12px;
+      background: #888;
+      transition: left 0.12s steps(3);
+    }
+    .px-switch-item.on {
+      color: var(--px-green);
+    }
+    .px-switch-item.on .px-switch {
+      background: var(--px-green);
+      box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.25);
+    }
+    .px-switch-item.on .px-switch::after {
+      left: calc(100% - 13px);
+      background: #fff;
+    }
+
+    /* ============ 裁剪类型选项卡 ============ */
     .crop-type-tabs {
       display: flex;
-      gap: 0;
-      margin-bottom: 15px;
-      border: 1px solid #0f3460;
-      border-radius: 8px;
-      overflow: hidden;
+      gap: 8px;
+      margin-bottom: 16px;
     }
-    .type-tab {
+    .crop-type-tabs .nes-btn {
       flex: 1;
-      background: #0f3460;
-      border: none;
-      padding: 10px 0;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
+      font-size: 11px;
+      padding-left: 4px;
+      padding-right: 4px;
     }
-    .type-tab.active {
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      font-weight: bold;
-    }
+
     .crop-ratio-section {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
     .crop-hint {
-      font-size: 13px;
-      color: #aaa;
+      font-size: 11px;
+      color: #9a9ab8;
+      line-height: 1.6;
     }
     .ratio-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: wrap;
     }
     .ratio-group label {
-      font-size: 13px;
-      color: #aaa;
-    }
-    .ratio-group input[type="number"] {
-      background: #0f3460;
-      border: 1px solid #00d9ff;
-      padding: 6px 8px;
-      border-radius: 6px;
-      color: #fff;
-      width: 70px;
-      font-size: 14px;
+      font-size: 11px;
+      color: #9a9ab8;
     }
     .ratio-group span {
-      color: #aaa;
+      color: var(--px-cyan);
     }
     .ratio-btn {
-      background: #0f3460;
-      border: 1px solid #0f3460;
-      padding: 6px 12px;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 13px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 4px 8px !important;
+      font-size: 10px !important;
     }
-    .ratio-btn:hover {
-      border-color: #00d9ff;
-    }
-    .ratio-btn.active {
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border-color: transparent;
-      font-weight: bold;
-    }
+
+    /* ============ 裁剪舞台 ============ */
     .crop-stage {
       position: relative;
-      background: #0f3460;
+      background: repeating-conic-gradient(#1c1c2a 0% 25%, #12121c 0% 50%) 0 0 / 16px 16px;
       width: 100%;
-      max-height: 55vh;
-      min-height: 200px;
+      max-height: 52vh;
+      min-height: 220px;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      border-radius: 8px;
+      border: 4px solid var(--px-border);
+      box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.5);
       user-select: none;
     }
     .crop-source-img {
@@ -469,255 +572,221 @@
     }
     .crop-box {
       position: absolute;
-      border: 1px solid #00d9ff;
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+      border: 2px dashed #fff;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
       cursor: move;
     }
     .crop-handle {
       position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #00d9ff;
-      border-radius: 2px;
+      width: 12px;
+      height: 12px;
+      background: var(--px-cyan);
+      border: 2px solid #fff;
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
     }
-    .crop-handle.nw { top: -5px; left: -5px; cursor: nwse-resize; }
-    .crop-handle.n  { top: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
-    .crop-handle.ne { top: -5px; right: -5px; cursor: nesw-resize; }
-    .crop-handle.e  { top: 50%; right: -5px; transform: translateY(-50%); cursor: ew-resize; }
-    .crop-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
-    .crop-handle.s  { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
-    .crop-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
-    .crop-handle.w  { top: 50%; left: -5px; transform: translateY(-50%); cursor: ew-resize; }
-    .crop-flip-group {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 15px;
-    }
-    .crop-flip-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #aaa;
-      cursor: pointer;
-      user-select: none;
-    }
-    .crop-switch {
-      position: relative;
-      width: 42px;
-      height: 22px;
-      background: #0f3460;
-      border-radius: 11px;
-      border: 1px solid #00d9ff;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-    .crop-switch::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 16px;
-      height: 16px;
-      background: #fff;
-      border-radius: 50%;
-      transition: transform 0.2s;
-    }
-    .crop-flip-item.active .crop-switch {
-      background: linear-gradient(135deg, #00ff88, #00cc6a);
-      border-color: transparent;
-    }
-    .crop-flip-item.active .crop-switch::after {
-      transform: translateX(20px);
-    }
-    .crop-flip-item.active {
-      color: #00ff88;
-    }
+    .crop-handle.nw { top: -7px; left: -7px; cursor: nwse-resize; }
+    .crop-handle.n  { top: -7px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+    .crop-handle.ne { top: -7px; right: -7px; cursor: nesw-resize; }
+    .crop-handle.e  { top: 50%; right: -7px; transform: translateY(-50%); cursor: ew-resize; }
+    .crop-handle.se { bottom: -7px; right: -7px; cursor: nwse-resize; }
+    .crop-handle.s  { bottom: -7px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+    .crop-handle.sw { bottom: -7px; left: -7px; cursor: nesw-resize; }
+    .crop-handle.w  { top: 50%; left: -7px; transform: translateY(-50%); cursor: ew-resize; }
     .crop-modal-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      margin-top: 15px;
+      gap: 10px;
+      margin-top: 16px;
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <div class="drawer-container">
-      <button class="drawer-toggle" @click="toggleDrawer">☰</button>
-      <div class="drawer-content" :class="{ open: drawerOpen }">
-        <h3>操作面板</h3>
-        
+    <!-- 标题栏 -->
+    <header class="title-bar">
+      <span class="title-logo">▚▞</span>
+      <h1 class="title-text">PERLER BEADS <span class="title-accent">HELPER</span></h1>
+      <span class="title-sub">拼豆辅助工具 v1.0</span>
+    </header>
+
+    <main class="main-area">
+      <!-- 左侧控制台 -->
+      <aside class="side-panel px-panel">
+        <h2 class="panel-title">▸ CONSOLE 控制台</h2>
+
         <div class="control-group">
-          <label>上传图片</label>
-          <input type="file" accept="image/*" @change="handleImageUpload" ref="fileInput">
+          <label class="px-label">▸ 图片 IMAGE</label>
+          <input type="file" accept="image/*" @change="handleImageUpload" ref="fileInput" style="display:none">
+          <button class="nes-btn is-primary full-btn" @click="triggerFileInput">选择图片</button>
           <div v-if="imageInfo" class="image-info">{{ imageRatio }}</div>
         </div>
 
         <div class="control-group">
-          <label>宽度 (像素点)</label>
-          <input type="number" v-model.number="pixelWidth" min="5" max="200" @input="generatePixelArt">
+          <label class="px-label">▸ 尺寸 SIZE (像素点)</label>
+          <div class="input-row">
+            <input type="number" class="px-input" v-model.number="pixelWidth" min="5" max="200" @input="generatePixelArt">
+            <span class="px-x">×</span>
+            <input type="number" class="px-input" v-model.number="pixelHeight" min="5" max="200" @input="generatePixelArt">
+          </div>
         </div>
 
         <div class="control-group">
-          <label>高度 (像素点)</label>
-          <input type="number" v-model.number="pixelHeight" min="5" max="200" @input="generatePixelArt">
+          <label class="px-label">▸ 颜色数量 COLORS: {{ colorCount }}</label>
+          <input type="range" class="px-range" v-model.number="colorCount" min="2" max="256" step="1" @input="applyColorQuantization">
         </div>
 
         <div class="control-group">
-          <label>颜色数量: {{ colorCount }}</label>
-          <input type="range" v-model.number="colorCount" min="2" max="256" step="1" @input="applyColorQuantization">
-        </div>
-
-        <button class="btn btn-secondary" @click="downloadPixelArt" :disabled="!pixelData">
-          下载像素画
-        </button>
-
-        <div class="control-group btn-group">
-          <button class="btn btn-small" @click="flipHorizontal" :disabled="!originalImage">水平翻转</button>
-          <button class="btn btn-small" @click="flipVertical" :disabled="!originalImage">垂直翻转</button>
+          <label class="px-label">▸ 翻转 FLIP</label>
+          <div class="btn-row">
+            <button class="nes-btn" @click="flipHorizontal" :disabled="!originalImage">⇋ 水平</button>
+            <button class="nes-btn" @click="flipVertical" :disabled="!originalImage">⇅ 垂直</button>
+          </div>
         </div>
 
         <div class="control-group">
-          <label>缩放: {{ Math.round(scale * 100) }}%</label>
-          <input type="range" v-model.number="scale" min="0.2" max="5" step="0.1">
+          <label class="px-label">▸ 缩放 ZOOM: {{ Math.round(scale * 100) }}%</label>
+          <input type="range" class="px-range" v-model.number="scale" min="0.2" max="5" step="0.1">
         </div>
 
-        <button class="btn btn-secondary" @click="resetPosition" :disabled="!originalImage">
-          重置位置
-        </button>
+        <div class="control-group btn-stack">
+          <button class="nes-btn is-warning full-btn" @click="openCropModal">✂ 图片裁剪</button>
+          <button class="nes-btn full-btn" @click="resetPosition" :disabled="!originalImage">⌖ 重置位置</button>
+          <button class="nes-btn is-success full-btn" @click="downloadPixelArt" :disabled="!pixelData">⬇ 下载像素画</button>
+        </div>
+      </aside>
 
-        <button class="btn btn-secondary" @click="openCropModal">
-          图片裁剪
-        </button>
-      </div>
-    </div>
+      <!-- 右侧预览区 -->
+      <section class="preview-area" ref="previewContainer" @wheel.prevent="handleWheel" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
+        <div v-if="!originalImage" class="empty-state" :class="{ dragging: isDraggingOver }" @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="handleDrop">
+          <div class="icon">▚▞▚</div>
+          <p>点击此处选择图片<br>或将图片拖拽到此处上传</p>
+          <p class="tip">支持: JPEG / PNG / WebP / AVIF / BMP / GIF | 最大 20MB</p>
+        </div>
 
-    <div class="preview-container" ref="previewContainer" @wheel.prevent="handleWheel" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
-      <div v-if="!originalImage" class="empty-state" :class="{ dragging: isDraggingOver }" @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="handleDrop">
-        <p>🖼️ 点击此处选择图片</p>
-        <p>或将图片拖拽到此处上传</p>
-        <p style="font-size: 12px; color: #888; margin-top: 15px;">支持格式: JPEG、PNG、WebP、AVIF、BMP、GIF | 最大 20MB</p>
-      </div>
+        <div v-else
+             class="canvas-wrapper"
+             :class="{ dragging: isDragging }"
+             :style="{
+               transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
+               transformOrigin: 'top left'
+             }">
+          <canvas
+            ref="mainCanvas"
+            class="main-canvas"
+            :width="canvasWidth"
+            :height="canvasHeight"
+            @click="handleCanvasClick"
+            @mousemove="handleCanvasHover"
+            @mouseleave="handleCanvasLeave"
+          ></canvas>
 
-      <div v-else 
-           class="canvas-wrapper" 
-           :class="{ dragging: isDragging }"
-           :style="{ 
-             transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
-             transformOrigin: 'top left'
-           }">
-        <canvas
-          ref="mainCanvas"
-          class="main-canvas"
-          :width="canvasWidth"
-          :height="canvasHeight"
-          @click="handleCanvasClick"
-          @mousemove="handleCanvasHover"
-          @mouseleave="handleCanvasLeave"
-        ></canvas>
-        
-        <div 
-          v-if="hoveredPixel"
-          class="highlight-overlay highlight-row hover"
-          :style="{ top: (rulerHeight + hoveredPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
-        ></div>
-        <div 
-          v-if="hoveredPixel"
-          class="highlight-overlay highlight-col hover"
-          :style="{ left: (rulerWidth + hoveredPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
-        ></div>
-        
-        <div 
-          v-if="selectedPixel"
-          class="highlight-overlay highlight-row"
-          :style="{ top: (rulerHeight + selectedPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
-        ></div>
-        <div 
-          v-if="selectedPixel"
-          class="highlight-overlay highlight-col"
-          :style="{ left: (rulerWidth + selectedPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
-        ></div>
-      </div>
-    </div>
+          <div
+            v-if="hoveredPixel"
+            class="highlight-overlay highlight-row hover"
+            :style="{ top: (rulerHeight + hoveredPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
+          ></div>
+          <div
+            v-if="hoveredPixel"
+            class="highlight-overlay highlight-col hover"
+            :style="{ left: (rulerWidth + hoveredPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
+          ></div>
 
-    <div class="position-info hovered-info" v-if="hoveredPixel && hoveredPixelColor">
-      <div class="info-title">悬浮</div>
-      <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> | Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
-      <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
-      <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }}, {{ hoveredPixelColor.g }}, {{ hoveredPixelColor.b }}</span></div>
-      <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
-    </div>
+          <div
+            v-if="selectedPixel"
+            class="highlight-overlay highlight-row"
+            :style="{ top: (rulerHeight + selectedPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
+          ></div>
+          <div
+            v-if="selectedPixel"
+            class="highlight-overlay highlight-col"
+            :style="{ left: (rulerWidth + selectedPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
+          ></div>
+        </div>
 
-    <div class="position-info selected-info" v-if="selectedPixel && selectedPixelColor">
-      <div class="info-title">选中</div>
-      <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> | Y: <span>{{ selectedPixel.y + 1 }}</span></div>
-      <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
-      <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }}, {{ selectedPixelColor.g }}, {{ selectedPixelColor.b }}</span></div>
-      <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
-    </div>
+        <!-- 悬浮信息卡片 -->
+        <div class="info-card hovered-info" v-if="hoveredPixel && hoveredPixelColor">
+          <div class="info-title">HOVER 悬浮</div>
+          <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
+          <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
+          <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }},{{ hoveredPixelColor.g }},{{ hoveredPixelColor.b }}</span></div>
+          <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
+        </div>
 
-    <div class="zoom-info">
-      当前缩放: {{ Math.round(scale * 100) }}% | 滚轮缩放 | 拖动移动 | 像素点: {{ pixelWidth }} × {{ pixelHeight }}
-    </div>
+        <!-- 选中信息卡片 -->
+        <div class="info-card selected-info" v-if="selectedPixel && selectedPixelColor">
+          <div class="info-title">LOCK 选中</div>
+          <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> Y: <span>{{ selectedPixel.y + 1 }}</span></div>
+          <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
+          <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }},{{ selectedPixelColor.g }},{{ selectedPixelColor.b }}</span></div>
+          <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
+        </div>
 
+        <div class="zoom-info">
+          ZOOM {{ Math.round(scale * 100) }}% | {{ pixelWidth }} × {{ pixelHeight }}<br>
+          滚轮缩放 · 拖动移动
+        </div>
+      </section>
+    </main>
+
+    <!-- 裁剪弹窗 -->
     <div v-if="cropModalOpen" class="crop-modal-overlay" @mousedown.self="closeCropModal">
-      <div class="crop-modal">
+      <div class="crop-modal px-panel">
         <div class="crop-modal-header">
-          <button class="crop-close" @click="closeCropModal">×</button>
-          <h3>图片裁剪</h3>
+          <h3>✂ CROP 图片裁剪</h3>
+          <button class="nes-btn is-error crop-close" @click="closeCropModal">×</button>
         </div>
 
-        <div v-if="!cropImage" class="crop-upload-zone">
-          <input type="file" accept="image/*" @change="handleCropImageUpload">
-          <p>点击选择或拖拽图片到此处</p>
+        <div v-if="!cropImage" class="crop-upload-zone" @click="cropFileInput && cropFileInput.click()">
+          <input type="file" accept="image/*" @change="handleCropImageUpload" ref="cropFileInput" style="display:none">
+          <button class="nes-btn is-primary" @click.stop="cropFileInput && cropFileInput.click()">选择图片</button>
+          <p>点击选择要裁剪的图片</p>
         </div>
 
         <template v-else>
-          <div class="crop-flip-group">
-            <label class="crop-flip-item" :class="{ active: cropFlipH }">
-              水平翻转
-              <span class="crop-switch"></span>
-              <input type="checkbox" v-model="cropFlipH" style="display:none;">
+          <div class="switch-row">
+            <label class="px-switch-item" :class="{ on: cropFlipH }">
+              <input type="checkbox" v-model="cropFlipH">
+              <span class="px-switch"></span>
+              水平翻转 H-FLIP
             </label>
-            <label class="crop-flip-item" :class="{ active: cropFlipV }">
-              垂直翻转
-              <span class="crop-switch"></span>
-              <input type="checkbox" v-model="cropFlipV" style="display:none;">
+            <label class="px-switch-item" :class="{ on: cropFlipV }">
+              <input type="checkbox" v-model="cropFlipV">
+              <span class="px-switch"></span>
+              垂直翻转 V-FLIP
             </label>
           </div>
 
           <div class="crop-type-tabs">
-            <button class="type-tab" :class="{ active: cropType === 'free' }" @click="setCropType('free')">自由</button>
-            <button class="type-tab" :class="{ active: cropType === 'ratio' }" @click="setCropType('ratio')">宽高比</button>
-            <button class="type-tab" :class="{ active: cropType === 'pixel' }" @click="setCropType('pixel')">像素比</button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'free' }" @click="setCropType('free')">自由</button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'ratio' }" @click="setCropType('ratio')">宽高比</button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'pixel' }" @click="setCropType('pixel')">像素比</button>
           </div>
 
           <div class="crop-ratio-section" v-if="cropType === 'free'">
-            <p class="crop-hint">拖动裁剪框边角或边缘手柄，自由调整宽高</p>
+            <p class="crop-hint">▸ 拖动裁剪框边角或边缘手柄，自由调整宽高</p>
           </div>
 
           <div class="crop-ratio-section" v-else-if="cropType === 'ratio'">
             <div class="ratio-group">
               <button v-for="p in presetRatios" :key="p.label"
-                      class="ratio-btn" :class="{ active: activeRatio === p.label }"
+                      class="nes-btn ratio-btn" :class="{ 'is-success': activeRatio === p.label }"
                       @click="setPresetRatio(p)">{{ p.label }}</button>
             </div>
             <div class="ratio-group">
               <label>自定义比例</label>
-              <input type="number" v-model.number="customRatioW" min="1" @input="applyCustomRatio">
+              <input type="number" class="px-input small" v-model.number="customRatioW" min="1" @input="applyCustomRatio">
               <span>:</span>
-              <input type="number" v-model.number="customRatioH" min="1" @input="applyCustomRatio">
+              <input type="number" class="px-input small" v-model.number="customRatioH" min="1" @input="applyCustomRatio">
             </div>
           </div>
 
           <div class="crop-ratio-section" v-else-if="cropType === 'pixel'">
             <div class="ratio-group">
               <label>宽</label>
-              <input type="number" v-model.number="customPxW" min="1" @input="applyCustomPixels">
+              <input type="number" class="px-input small" v-model.number="customPxW" min="1" @input="applyCustomPixels">
               <span>×</span>
               <label>高</label>
-              <input type="number" v-model.number="customPxH" min="1" @input="applyCustomPixels">
+              <input type="number" class="px-input small" v-model.number="customPxH" min="1" @input="applyCustomPixels">
               <span>像素</span>
             </div>
           </div>
@@ -735,8 +804,8 @@
         </template>
 
         <div class="crop-modal-footer">
-          <button class="btn btn-secondary" @click="closeCropModal">取消</button>
-          <button class="btn" @click="applyCrop" :disabled="!cropImage">裁剪并保存</button>
+          <button class="nes-btn" @click="closeCropModal">取消</button>
+          <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">✔ 裁剪并保存</button>
         </div>
       </div>
     </div>
@@ -748,6 +817,7 @@
     createApp({
       setup() {
         const fileInput = ref(null);
+        const cropFileInput = ref(null);
         const mainCanvas = ref(null);
         const previewContainer = ref(null);
         const originalImage = ref(null);
@@ -760,7 +830,6 @@
         const pixelData = ref(null);
         const hoveredPixel = ref(null);
         const selectedPixel = ref(null);
-        const drawerOpen = ref(false);
         const isDragging = ref(false);
         const isDraggingOver = ref(false);
         const offsetX = ref(0);
@@ -823,13 +892,11 @@
 
           if (!allowedTypes.includes(file.type)) {
             alert('不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片');
-            fileInput.value = '';
             return;
           }
 
           if (file.size > maxSize) {
             alert('图片文件过大，请上传小于 20MB 的图片');
-            fileInput.value = '';
             return;
           }
 
@@ -901,11 +968,11 @@
 
         const applyColorQuantization = () => {
           if (!originalPixelData) return;
-          
+
           const data = originalPixelData.data;
           const w = pixelWidth.value;
           const h = pixelHeight.value;
-          
+
           const colorMap = new Map();
           for (let i = 0; i < data.length; i += 4) {
             if (data[i + 3] < 128) continue;
@@ -915,7 +982,7 @@
             const key = (r << 10) | (g << 5) | b;
             colorMap.set(key, (colorMap.get(key) || 0) + 1);
           }
-          
+
           const sortedColors = [...colorMap.entries()]
             .sort((a, b) => b[1] - a[1])
             .slice(0, colorCount.value)
@@ -924,7 +991,7 @@
               g: (key >> 5 & 31) << 3,
               b: (key & 31) << 3
             }));
-          
+
           const newData = new Uint8ClampedArray(data.length);
           for (let i = 0; i < data.length; i += 4) {
             if (data[i + 3] < 128) {
@@ -934,10 +1001,10 @@
               newData[i + 3] = 0;
               continue;
             }
-            
+
             let minDist = Infinity;
             let closest = sortedColors[0] || { r: 0, g: 0, b: 0 };
-            
+
             for (const color of sortedColors) {
               const dr = data[i] - color.r;
               const dg = data[i + 1] - color.g;
@@ -948,13 +1015,13 @@
                 closest = color;
               }
             }
-            
+
             newData[i] = closest.r;
             newData[i + 1] = closest.g;
             newData[i + 2] = closest.b;
             newData[i + 3] = 255;
           }
-          
+
           pixelData.value = new ImageData(newData, w, h);
           renderCanvas();
         };
@@ -970,7 +1037,7 @@
           const newData = new Uint8ClampedArray(data.length);
           const w = pixelWidth.value;
           const h = pixelHeight.value;
-          
+
           for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
               const srcIdx = (y * w + x) * 4;
@@ -981,7 +1048,7 @@
               newData[dstIdx + 3] = data[srcIdx + 3];
             }
           }
-          
+
           pixelData.value = new ImageData(newData, w, h);
           originalPixelData = pixelData.value;
           if (colorCount.value < 256) {
@@ -1002,7 +1069,7 @@
           const newData = new Uint8ClampedArray(data.length);
           const w = pixelWidth.value;
           const h = pixelHeight.value;
-          
+
           for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
               const srcIdx = (y * w + x) * 4;
@@ -1013,7 +1080,7 @@
               newData[dstIdx + 3] = data[srcIdx + 3];
             }
           }
-          
+
           pixelData.value = new ImageData(newData, w, h);
           originalPixelData = pixelData.value;
           if (colorCount.value < 256) {
@@ -1056,7 +1123,7 @@
 
           pixelData.value = tempCtx.getImageData(0, 0, pixelWidth.value, pixelHeight.value);
           originalPixelData = pixelData.value;
-          
+
           if (colorCount.value < 256) {
             applyColorQuantization();
           } else {
@@ -1074,7 +1141,7 @@
           const ctx = canvas.getContext('2d');
           const data = pixelData.value.data;
 
-          ctx.fillStyle = '#0f3460';
+          ctx.fillStyle = '#14141f';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           drawRuler(ctx);
@@ -1108,7 +1175,7 @@
          * @param {CanvasRenderingContext2D} ctx - 画布上下文
          */
         const drawRuler = (ctx) => {
-          ctx.fillStyle = '#0f3460';
+          ctx.fillStyle = '#14141f';
           ctx.fillRect(0, 0, rulerWidth.value, rulerHeight.value);
 
           ctx.strokeStyle = '#00d9ff';
@@ -1121,7 +1188,7 @@
           ctx.stroke();
 
           ctx.fillStyle = '#00d9ff';
-          ctx.font = '12px Microsoft YaHei';
+          ctx.font = '9px "Press Start 2P", monospace';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
 
@@ -1248,11 +1315,6 @@
 
         const handleCanvasLeave = () => {
           hoveredPixel.value = null;
-        };
-
-        /** 切换抽屉面板展开/收起 */
-        const toggleDrawer = () => {
-          drawerOpen.value = !drawerOpen.value;
         };
 
         /** 鼠标按下：开始拖拽画布 */
@@ -1647,13 +1709,21 @@
           }
         });
 
+        /** 像素字体加载完成后重绘画布标尺，避免 fallback 字体残留 */
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => {
+            if (pixelData.value) renderCanvas();
+          });
+        }
+
         return {
           fileInput,
+          cropFileInput,
           mainCanvas,
           previewContainer,
           originalImage,
-          drawerOpen,
           isDragging,
+          isDraggingOver,
           offsetX,
           offsetY,
           pixelWidth,
@@ -1682,7 +1752,6 @@
           handleCanvasClick,
           handleCanvasHover,
           handleCanvasLeave,
-          toggleDrawer,
           resetPosition,
           handleMouseDown,
           handleMouseMove,
@@ -1707,6 +1776,9 @@
           customRatioH,
           customPxW,
           customPxH,
+          cropFlipH,
+          cropFlipV,
+          cropTransform,
           openCropModal,
           closeCropModal,
           handleCropImageUpload,
@@ -1719,9 +1791,6 @@
           handleCropMouseDown,
           handleCropMouseMove,
           handleCropMouseUp,
-          cropFlipH,
-          cropFlipV,
-          cropTransform,
           applyCrop
         };
       }
