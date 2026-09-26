@@ -4,13 +4,14 @@
 
 
 
-预览图   
+## 预览图   
 
-![preview](./static/preview.png)
-![preview2](./static/preview2.png)
+![preview](./preview/preview.png)
+![preview2](./preview/preview2.png)
+![preview3](./preview/preview3.png)
 
 
-使用方法：   
+## 使用方法：   
 克隆项目或下载压缩包到本地后解压；   
 双击index.html文件，在浏览器打开网页；   
 根据自己板子大小或者想要的大小调整宽高像素点，上传图片查看效果图；   
