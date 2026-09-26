@@ -4,721 +4,271 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>拼豆辅助工具</title>
-  <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@3.3/dist/vue.global.js"></script> -->
+  <link rel="stylesheet" href="./static/nes.min.css">
+  <link rel="stylesheet" href="./css/style.css">
   <script src="./static/vue.3.5.38.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html, body {
-      font-family: 'Microsoft YaHei', sans-serif;
-      background: #1a1a2e;
-      color: #eee;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-    #app {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-bottom: 15px;
-    }
-    .control-group label {
-      font-size: 14px;
-      color: #aaa;
-    }
-    .control-group input[type="file"] {
-      background: #0f3460;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      color: #fff;
-      cursor: pointer;
-      width: 100%;
-    }
-    .control-group input[type="number"] {
-      background: #0f3460;
-      border: 1px solid #00d9ff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      color: #fff;
-      width: 100%;
-      font-size: 16px;
-    }
-    .control-group input[type="number"]:focus {
-      outline: none;
-      border-color: #00ff88;
-    }
-    .image-info {
-      margin-top: 6px;
-      font-size: 12px;
-      color: #00d9ff;
-    }
-    .control-group input[type="range"] {
-      width: 100%;
-      height: 6px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: linear-gradient(90deg, #0f3460, #00d9ff, #0f3460);
-      border-radius: 3px;
-      cursor: pointer;
-    }
-    .control-group input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 217, 255, 0.5);
-      transition: transform 0.2s;
-    }
-    .control-group input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
-    .btn {
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
-    }
-    .btn:active {
-      transform: translateY(0);
-    }
-    .btn-secondary {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-    }
-    .btn-small {
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-    .btn-group {
-      display: flex;
-      gap: 8px;
-    }
-    .preview-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #16213e;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-    }
-    .canvas-wrapper {
-      position: relative;
-      background: #0f3460;
-      border-radius: 4px;
-      overflow: visible;
-    }
-    .main-canvas {
-      image-rendering: pixelated;
-      cursor: crosshair;
-      border: none;
-      display: block;
-    }
-    .highlight-overlay {
-      position: absolute;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .highlight-row {
-      background: rgba(0, 217, 255, 0.3);
-    }
-    .highlight-col {
-      background: rgba(0, 217, 255, 0.3);
-    }
-    .highlight-row.hover {
-      background: rgba(0, 255, 136, 0.15);
-      z-index: 5;
-    }
-    .highlight-col.hover {
-      background: rgba(0, 255, 136, 0.15);
-      z-index: 5;
-    }
-    .position-info {
-      position: fixed;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 12px 15px;
-      border-radius: 8px;
-      color: #00d9ff;
-      font-size: 13px;
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .hovered-info {
-      top: 20px;
-      left: 20px;
-      border: 1px solid #00d9ff;
-    }
-    .selected-info {
-      top: 20px;
-      left: 220px;
-      border: 1px solid #ff6b6b;
-    }
-    .info-title {
-      font-weight: bold;
-      font-size: 14px;
-      margin-bottom: 4px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-    .hovered-info .info-title {
-      color: #00d9ff;
-    }
-    .selected-info .info-title {
-      color: #ff6b6b;
-    }
-    .position-row {
-      display: flex;
-      gap: 10px;
-    }
-    .position-info span {
-      color: #fff;
-    }
-    .color-code {
-      font-family: monospace;
-    }
-    .color-swatch {
-      width: 50px;
-      height: 50px;
-      border-radius: 4px;
-      margin-top: 5px;
-    }
-    .hovered-info .color-swatch {
-      border: 2px solid #00d9ff;
-    }
-    .selected-info .color-swatch {
-      border: 2px solid #ff6b6b;
-    }
-    .zoom-info {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 10px 15px;
-      border-radius: 8px;
-      color: #00d9ff;
-      font-size: 14px;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 60px;
-      color: #666;
-      cursor: pointer;
-      border: 3px dashed #333;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      width: 80%;
-      max-width: 500px;
-    }
-    .empty-state:hover {
-      border-color: #00d9ff;
-      color: #aaa;
-      background: rgba(0, 217, 255, 0.05);
-    }
-    .empty-state.dragging {
-      border-color: #00ff88;
-      color: #00ff88;
-      background: rgba(0, 255, 136, 0.1);
-    }
-    .empty-state p {
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    .drawer-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 100;
-    }
-    .drawer-toggle {
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border: none;
-      border-radius: 50%;
-      color: #fff;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .drawer-toggle:hover {
-      transform: rotate(90deg);
-      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.6);
-    }
-    .drawer-content {
-      position: absolute;
-      top: 60px;
-      right: 0;
-      width: 280px;
-      background: #16213e;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-      transform: translateX(120%);
-      opacity: 0;
-      transition: transform 0.3s, opacity 0.3s;
-    }
-    .drawer-content.open {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    .drawer-content h3 {
-      color: #00d9ff;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #0f3460;
-    }
-    .drawer-content .btn {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    .canvas-wrapper.dragging {
-      cursor: grabbing;
-    }
-    .canvas-wrapper:not(.dragging) {
-      cursor: grab;
-    }
-    .crop-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .crop-modal {
-      background: #16213e;
-      border-radius: 12px;
-      padding: 20px;
-      width: 90%;
-      max-width: 860px;
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-    }
-    .crop-modal-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #0f3460;
-    }
-    .crop-modal-header h3 {
-      color: #00d9ff;
-      font-size: 18px;
-      margin: 0;
-    }
-    .crop-close {
-      width: 30px;
-      height: 30px;
-      background: #0f3460;
-      border: 1px solid #00d9ff;
-      border-radius: 6px;
-      color: #00d9ff;
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .crop-close:hover {
-      transform: rotate(90deg);
-    }
-    .crop-upload-zone {
-      border: 3px dashed #333;
-      border-radius: 12px;
-      padding: 40px;
-      text-align: center;
-      color: #666;
-      cursor: pointer;
-    }
-    .crop-upload-zone p {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .crop-upload-zone input[type="file"] {
-      background: #0f3460;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      color: #fff;
-      cursor: pointer;
-      width: 100%;
-    }
-    .crop-type-tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 15px;
-      border: 1px solid #0f3460;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .type-tab {
-      flex: 1;
-      background: #0f3460;
-      border: none;
-      padding: 10px 0;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .type-tab.active {
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      font-weight: bold;
-    }
-    .crop-ratio-section {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .crop-hint {
-      font-size: 13px;
-      color: #aaa;
-    }
-    .ratio-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .ratio-group label {
-      font-size: 13px;
-      color: #aaa;
-    }
-    .ratio-group input[type="number"] {
-      background: #0f3460;
-      border: 1px solid #00d9ff;
-      padding: 6px 8px;
-      border-radius: 6px;
-      color: #fff;
-      width: 70px;
-      font-size: 14px;
-    }
-    .ratio-group span {
-      color: #aaa;
-    }
-    .ratio-btn {
-      background: #0f3460;
-      border: 1px solid #0f3460;
-      padding: 6px 12px;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 13px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .ratio-btn:hover {
-      border-color: #00d9ff;
-    }
-    .ratio-btn.active {
-      background: linear-gradient(135deg, #00d9ff, #00a8cc);
-      border-color: transparent;
-      font-weight: bold;
-    }
-    .crop-stage {
-      position: relative;
-      background: #0f3460;
-      width: 100%;
-      max-height: 55vh;
-      min-height: 200px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      border-radius: 8px;
-      user-select: none;
-    }
-    .crop-source-img {
-      max-width: 100%;
-      max-height: 100%;
-      display: block;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-    .crop-box {
-      position: absolute;
-      border: 1px solid #00d9ff;
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-      cursor: move;
-    }
-    .crop-handle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #00d9ff;
-      border-radius: 2px;
-    }
-    .crop-handle.nw { top: -5px; left: -5px; cursor: nwse-resize; }
-    .crop-handle.n  { top: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
-    .crop-handle.ne { top: -5px; right: -5px; cursor: nesw-resize; }
-    .crop-handle.e  { top: 50%; right: -5px; transform: translateY(-50%); cursor: ew-resize; }
-    .crop-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
-    .crop-handle.s  { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
-    .crop-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
-    .crop-handle.w  { top: 50%; left: -5px; transform: translateY(-50%); cursor: ew-resize; }
-    .crop-flip-group {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 15px;
-    }
-    .crop-flip-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #aaa;
-      cursor: pointer;
-      user-select: none;
-    }
-    .crop-switch {
-      position: relative;
-      width: 42px;
-      height: 22px;
-      background: #0f3460;
-      border-radius: 11px;
-      border: 1px solid #00d9ff;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-    .crop-switch::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 16px;
-      height: 16px;
-      background: #fff;
-      border-radius: 50%;
-      transition: transform 0.2s;
-    }
-    .crop-flip-item.active .crop-switch {
-      background: linear-gradient(135deg, #00ff88, #00cc6a);
-      border-color: transparent;
-    }
-    .crop-flip-item.active .crop-switch::after {
-      transform: translateX(20px);
-    }
-    .crop-flip-item.active {
-      color: #00ff88;
-    }
-    .crop-modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 15px;
-    }
-  </style>
 </head>
 <body>
   <div id="app">
-    <div class="drawer-container">
-      <button class="drawer-toggle" @click="toggleDrawer">☰</button>
-      <div class="drawer-content" :class="{ open: drawerOpen }">
-        <h3>操作面板</h3>
-        
+    <!-- 标题栏 -->
+    <header class="title-bar">
+      <span class="title-logo">▚▞</span>
+      <h1 class="title-text">PERLER BEADS <span class="title-accent">HELPER</span></h1>
+      <span class="title-sub"><span class="cjk">拼豆辅助工具</span> v1.0</span>
+      <div class="title-controls">
+        <label class="px-switch-item" :class="{ on: panelOpen }" title="展开 / 收起左侧操作面板">
+          <input type="checkbox" v-model="panelOpen">
+          <span class="px-switch"></span>
+          <span class="cjk">面板</span>
+        </label>
+        <label class="px-switch-item" :class="{ on: pixelFont }" title="开启 / 关闭像素字体">
+          <input type="checkbox" v-model="pixelFont">
+          <span class="px-switch"></span>
+          <span class="cjk">像素字体</span>
+        </label>
+      </div>
+      <div class="repo-links">
+        <a class="repo-link gitee" href="https://gitee.com/miaoaa66/perler-beads-helper" target="_blank" rel="noopener noreferrer" title="Gitee 仓库" aria-label="Gitee 仓库">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.984 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.016 0zm6.09 5.333c.328 0 .593.266.592.593v1.482a.594.594 0 0 1-.593.592H9.777c-.982 0-1.778.796-1.778 1.778v5.63c0 .327.266.592.593.592h5.63c.982 0 1.778-.796 1.778-1.778v-.296a.593.593 0 0 0-.592-.593h-4.15a.592.592 0 0 1-.592-.592v-1.482a.593.593 0 0 1 .593-.592h6.815c.327 0 .593.265.593.592v3.408a4 4 0 0 1-4 4H5.926a.593.593 0 0 1-.593-.593V9.778a4.444 4.444 0 0 1 4.445-4.444h8.296Z"/></svg>
+        </a>
+        <a class="repo-link github" href="https://github.com/miaoaa66/perler-beads-helper" target="_blank" rel="noopener noreferrer" title="GitHub 仓库" aria-label="GitHub 仓库">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        </a>
+      </div>
+    </header>
+
+    <main class="main-area">
+      <!-- 左侧控制台 -->
+      <aside class="side-panel px-panel" :class="{ collapsed: !panelOpen }">
+        <h2 class="panel-title">▸ CONSOLE <span class="cjk">控制台</span></h2>
+
         <div class="control-group">
-          <label>上传图片</label>
-          <input type="file" accept="image/*" @change="handleImageUpload" ref="fileInput">
+          <label class="px-label">▸ IMAGE <span class="cjk">图片</span></label>
+          <input type="file" accept="image/*" @change="handleImageUpload" ref="fileInput" style="display:none">
+          <button class="nes-btn is-primary full-btn" @click="triggerFileInput"><span class="cjk">选择图片</span></button>
           <div v-if="imageInfo" class="image-info">{{ imageRatio }}</div>
         </div>
 
         <div class="control-group">
-          <label>宽度 (像素点)</label>
-          <input type="number" v-model.number="pixelWidth" min="5" max="200" @input="generatePixelArt">
+          <label class="px-label">▸ SIZE <span class="cjk">尺寸</span> (<span class="cjk">像素点</span>)</label>
+          <div class="input-row">
+            <input type="number" class="px-input" :value="pixelWidth" min="5" max="200" step="1" @input="handleSizeInput($event, 'width')">
+            <span class="px-x">×</span>
+            <input type="number" class="px-input" :value="pixelHeight" min="5" max="200" step="1" @input="handleSizeInput($event, 'height')">
+          </div>
         </div>
 
         <div class="control-group">
-          <label>高度 (像素点)</label>
-          <input type="number" v-model.number="pixelHeight" min="5" max="200" @input="generatePixelArt">
+          <label class="px-label">▸ COLORS <span class="cjk">颜色数量</span>: {{ colorCount }}</label>
+          <input type="range" class="px-range" v-model.number="colorCount" min="2" max="256" step="1" @input="applyColorQuantization">
         </div>
 
         <div class="control-group">
-          <label>颜色数量: {{ colorCount }}</label>
-          <input type="range" v-model.number="colorCount" min="2" max="256" step="1" @input="applyColorQuantization">
-        </div>
-
-        <button class="btn btn-secondary" @click="downloadPixelArt" :disabled="!pixelData">
-          下载像素画
-        </button>
-
-        <div class="control-group btn-group">
-          <button class="btn btn-small" @click="flipHorizontal" :disabled="!originalImage">水平翻转</button>
-          <button class="btn btn-small" @click="flipVertical" :disabled="!originalImage">垂直翻转</button>
+          <label class="px-label">▸ FLIP <span class="cjk">翻转</span></label>
+          <div class="switch-row compact">
+            <label class="px-switch-item" :class="{ on: flipH, disabled: !originalImage }">
+              <input type="checkbox" v-model="flipH" :disabled="!originalImage">
+              <span class="px-switch"></span>
+              <span class="cjk">水平</span>
+            </label>
+            <label class="px-switch-item" :class="{ on: flipV, disabled: !originalImage }">
+              <input type="checkbox" v-model="flipV" :disabled="!originalImage">
+              <span class="px-switch"></span>
+              <span class="cjk">垂直</span>
+            </label>
+          </div>
         </div>
 
         <div class="control-group">
-          <label>缩放: {{ Math.round(scale * 100) }}%</label>
-          <input type="range" v-model.number="scale" min="0.2" max="5" step="0.1">
+          <label class="px-label">▸ ZOOM <span class="cjk">缩放</span>: {{ Math.round(scale * 100) }}%</label>
+          <input type="range" class="px-range" v-model.number="scale" min="0.2" max="5" step="0.1">
         </div>
 
-        <button class="btn btn-secondary" @click="resetPosition" :disabled="!originalImage">
-          重置位置
-        </button>
+        <div class="control-group">
+          <button class="nes-btn full-btn" @click="resetPosition" :disabled="!originalImage">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="6" y="0" width="2" height="4"/>
+                <rect x="6" y="10" width="2" height="4"/>
+                <rect x="0" y="6" width="4" height="2"/>
+                <rect x="10" y="6" width="4" height="2"/>
+                <rect x="5" y="5" width="4" height="4"/>
+              </svg>
+              <span class="cjk">重置位置</span>
+            </span>
+          </button>
+          <button class="nes-btn is-success full-btn" @click="downloadPixelArt" :disabled="!pixelData">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="6" y="0" width="2" height="5"/>
+                <rect x="4" y="5" width="6" height="2"/>
+                <rect x="5" y="7" width="4" height="2"/>
+                <rect x="6" y="9" width="2" height="2"/>
+                <rect x="1" y="12" width="12" height="2"/>
+              </svg>
+              <span class="cjk">下载像素画</span>
+            </span>
+          </button>
+        </div>
 
-        <button class="btn btn-secondary" @click="openCropModal">
-          图片裁剪
-        </button>
-      </div>
-    </div>
+        <div class="control-group btn-stack">
+          <button class="nes-btn is-warning full-btn" @click="openCropModal">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="2" y="0" width="2" height="11"/>
+                <rect x="0" y="2" width="11" height="2"/>
+                <rect x="10" y="2" width="2" height="12"/>
+                <rect x="2" y="10" width="12" height="2"/>
+              </svg>
+              <span class="cjk">图片裁剪</span>
+            </span>
+          </button>
+        </div>
+      </aside>
 
-    <div class="preview-container" ref="previewContainer" @wheel.prevent="handleWheel" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
-      <div v-if="!originalImage" class="empty-state" :class="{ dragging: isDraggingOver }" @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="handleDrop">
-        <p>🖼️ 点击此处选择图片</p>
-        <p>或将图片拖拽到此处上传</p>
-        <p style="font-size: 12px; color: #888; margin-top: 15px;">支持格式: JPEG、PNG、WebP、AVIF、BMP、GIF | 最大 20MB</p>
-      </div>
+      <!-- 右侧预览区 -->
+      <section class="preview-area" ref="previewContainer" @wheel.prevent="handleWheel" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
+        <div v-if="!originalImage" class="empty-state" :class="{ dragging: isDraggingOver }" @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="handleDrop">
+          <div class="icon">▚▞▚</div>
+          <p>点击此处选择图片<br>或将图片拖拽到此处上传</p>
+          <p class="tip"><span class="cjk">支持</span>: JPEG / PNG / WebP / AVIF / BMP / GIF | <span class="cjk">最大</span> 20MB</p>
+        </div>
 
-      <div v-else 
-           class="canvas-wrapper" 
-           :class="{ dragging: isDragging }"
-           :style="{ 
-             transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
-             transformOrigin: 'top left'
-           }">
-        <canvas
-          ref="mainCanvas"
-          class="main-canvas"
-          :width="canvasWidth"
-          :height="canvasHeight"
-          @click="handleCanvasClick"
-          @mousemove="handleCanvasHover"
-          @mouseleave="handleCanvasLeave"
-        ></canvas>
-        
-        <div 
-          v-if="hoveredPixel"
-          class="highlight-overlay highlight-row hover"
-          :style="{ top: (rulerHeight + hoveredPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
-        ></div>
-        <div 
-          v-if="hoveredPixel"
-          class="highlight-overlay highlight-col hover"
-          :style="{ left: (rulerWidth + hoveredPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
-        ></div>
-        
-        <div 
-          v-if="selectedPixel"
-          class="highlight-overlay highlight-row"
-          :style="{ top: (rulerHeight + selectedPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
-        ></div>
-        <div 
-          v-if="selectedPixel"
-          class="highlight-overlay highlight-col"
-          :style="{ left: (rulerWidth + selectedPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
-        ></div>
-      </div>
-    </div>
+        <div v-else
+             class="canvas-wrapper"
+             :class="{ dragging: isDragging }"
+             :style="{
+               transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
+               transformOrigin: 'top left'
+             }">
+          <canvas
+            ref="mainCanvas"
+            class="main-canvas"
+            :width="canvasWidth"
+            :height="canvasHeight"
+            @click="handleCanvasClick"
+            @mousemove="handleCanvasHover"
+            @mouseleave="handleCanvasLeave"
+          ></canvas>
 
-    <div class="position-info hovered-info" v-if="hoveredPixel && hoveredPixelColor">
-      <div class="info-title">悬浮</div>
-      <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> | Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
-      <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
-      <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }}, {{ hoveredPixelColor.g }}, {{ hoveredPixelColor.b }}</span></div>
-      <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
-    </div>
+          <div
+            v-if="hoveredPixel"
+            class="highlight-overlay highlight-row hover"
+            :style="{ top: (rulerHeight + hoveredPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
+          ></div>
+          <div
+            v-if="hoveredPixel"
+            class="highlight-overlay highlight-col hover"
+            :style="{ left: (rulerWidth + hoveredPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
+          ></div>
 
-    <div class="position-info selected-info" v-if="selectedPixel && selectedPixelColor">
-      <div class="info-title">选中</div>
-      <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> | Y: <span>{{ selectedPixel.y + 1 }}</span></div>
-      <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
-      <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }}, {{ selectedPixelColor.g }}, {{ selectedPixelColor.b }}</span></div>
-      <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
-    </div>
+          <div
+            v-if="selectedPixel"
+            class="highlight-overlay highlight-row"
+            :style="{ top: (rulerHeight + selectedPixel.y * cellSize) + 'px', height: cellSize + 'px', left: rulerWidth + 'px', width: pixelWidth * cellSize + 'px' }"
+          ></div>
+          <div
+            v-if="selectedPixel"
+            class="highlight-overlay highlight-col"
+            :style="{ left: (rulerWidth + selectedPixel.x * cellSize) + 'px', width: cellSize + 'px', top: rulerHeight + 'px', height: pixelHeight * cellSize + 'px' }"
+          ></div>
+        </div>
 
-    <div class="zoom-info">
-      当前缩放: {{ Math.round(scale * 100) }}% | 滚轮缩放 | 拖动移动 | 像素点: {{ pixelWidth }} × {{ pixelHeight }}
-    </div>
+        <!-- 悬浮信息卡片 -->
+        <div class="info-card hovered-info" v-if="hoveredPixel && hoveredPixelColor">
+          <div class="info-title">HOVER <span class="cjk">悬浮</span></div>
+          <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
+          <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
+          <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }},{{ hoveredPixelColor.g }},{{ hoveredPixelColor.b }}</span></div>
+          <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
+        </div>
 
+        <!-- 选中信息卡片 -->
+        <div class="info-card selected-info" v-if="selectedPixel && selectedPixelColor">
+          <div class="info-title">LOCK <span class="cjk">选中</span></div>
+          <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> Y: <span>{{ selectedPixel.y + 1 }}</span></div>
+          <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
+          <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }},{{ selectedPixelColor.g }},{{ selectedPixelColor.b }}</span></div>
+          <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
+        </div>
+
+        <div class="zoom-info">
+          ZOOM {{ Math.round(scale * 100) }}% | {{ pixelWidth }} × {{ pixelHeight }}<br>
+          <span class="cjk">滚轮缩放</span> · <span class="cjk">拖动移动</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- 裁剪弹窗 -->
     <div v-if="cropModalOpen" class="crop-modal-overlay" @mousedown.self="closeCropModal">
-      <div class="crop-modal">
+      <div class="crop-modal px-panel">
         <div class="crop-modal-header">
-          <button class="crop-close" @click="closeCropModal">×</button>
-          <h3>图片裁剪</h3>
+          <h3>
+            <svg class="crop-title-icon" viewBox="0 0 14 14" aria-hidden="true">
+              <rect x="2" y="0" width="2" height="11"/>
+              <rect x="0" y="2" width="11" height="2"/>
+              <rect x="10" y="2" width="2" height="12"/>
+              <rect x="2" y="10" width="12" height="2"/>
+            </svg>
+            CROP <span class="cjk">图片裁剪</span>
+          </h3>
+          <button class="nes-btn is-error crop-close" @click="closeCropModal">×</button>
         </div>
 
-        <div v-if="!cropImage" class="crop-upload-zone">
-          <input type="file" accept="image/*" @change="handleCropImageUpload">
-          <p>点击选择或拖拽图片到此处</p>
+        <div v-if="!cropImage" class="crop-upload-zone" :class="{ dragging: cropDragOver }"
+             @click="cropFileInput && cropFileInput.click()"
+             @dragover.prevent="onCropDragOver" @dragleave.prevent="onCropDragLeave" @drop.prevent="onCropDrop">
+          <input type="file" accept="image/*" @change="handleCropImageUpload" ref="cropFileInput" style="display:none">
+          <button class="nes-btn is-primary" @click.stop="cropFileInput && cropFileInput.click()"><span class="cjk">选择图片</span></button>
+          <p>点击选择要裁剪的图片<br>或将图片拖拽到此处上传</p>
         </div>
 
         <template v-else>
-          <div class="crop-flip-group">
-            <label class="crop-flip-item" :class="{ active: cropFlipH }">
-              水平翻转
-              <span class="crop-switch"></span>
-              <input type="checkbox" v-model="cropFlipH" style="display:none;">
+          <div class="switch-row">
+            <label class="px-switch-item" :class="{ on: cropFlipH }">
+              <input type="checkbox" v-model="cropFlipH">
+              <span class="px-switch"></span>
+              <span class="cjk">水平翻转</span> H-FLIP
             </label>
-            <label class="crop-flip-item" :class="{ active: cropFlipV }">
-              垂直翻转
-              <span class="crop-switch"></span>
-              <input type="checkbox" v-model="cropFlipV" style="display:none;">
+            <label class="px-switch-item" :class="{ on: cropFlipV }">
+              <input type="checkbox" v-model="cropFlipV">
+              <span class="px-switch"></span>
+              <span class="cjk">垂直翻转</span> V-FLIP
             </label>
           </div>
 
           <div class="crop-type-tabs">
-            <button class="type-tab" :class="{ active: cropType === 'free' }" @click="setCropType('free')">自由</button>
-            <button class="type-tab" :class="{ active: cropType === 'ratio' }" @click="setCropType('ratio')">宽高比</button>
-            <button class="type-tab" :class="{ active: cropType === 'pixel' }" @click="setCropType('pixel')">像素比</button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'free' }" @click="setCropType('free')"><span class="cjk">自由</span></button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'ratio' }" @click="setCropType('ratio')"><span class="cjk">宽高比</span></button>
+            <button class="nes-btn" :class="{ 'is-primary': cropType === 'pixel' }" @click="setCropType('pixel')"><span class="cjk">像素比</span></button>
           </div>
 
           <div class="crop-ratio-section" v-if="cropType === 'free'">
-            <p class="crop-hint">拖动裁剪框边角或边缘手柄，自由调整宽高</p>
+            <p class="crop-hint">▸ <span class="cjk">拖动裁剪框边角或边缘手柄，自由调整宽高</span></p>
           </div>
 
           <div class="crop-ratio-section" v-else-if="cropType === 'ratio'">
             <div class="ratio-group">
               <button v-for="p in presetRatios" :key="p.label"
-                      class="ratio-btn" :class="{ active: activeRatio === p.label }"
+                      class="nes-btn ratio-btn" :class="{ 'is-success': activeRatio === p.label }"
                       @click="setPresetRatio(p)">{{ p.label }}</button>
             </div>
             <div class="ratio-group">
-              <label>自定义比例</label>
-              <input type="number" v-model.number="customRatioW" min="1" @input="applyCustomRatio">
+              <label class="cjk">自定义比例</label>
+              <input type="number" class="px-input small" v-model.number="customRatioW" min="1" @input="applyCustomRatio">
               <span>:</span>
-              <input type="number" v-model.number="customRatioH" min="1" @input="applyCustomRatio">
+              <input type="number" class="px-input small" v-model.number="customRatioH" min="1" @input="applyCustomRatio">
             </div>
           </div>
 
           <div class="crop-ratio-section" v-else-if="cropType === 'pixel'">
             <div class="ratio-group">
-              <label>宽</label>
-              <input type="number" v-model.number="customPxW" min="1" @input="applyCustomPixels">
+              <label class="cjk">宽</label>
+              <input type="number" class="px-input small" v-model.number="customPxW" min="1" @input="applyCustomPixels">
               <span>×</span>
-              <label>高</label>
-              <input type="number" v-model.number="customPxH" min="1" @input="applyCustomPixels">
-              <span>像素</span>
+              <label class="cjk">高</label>
+              <input type="number" class="px-input small" v-model.number="customPxH" min="1" @input="applyCustomPixels">
+              <span class="cjk">像素</span>
             </div>
           </div>
 
@@ -735,997 +285,28 @@
         </template>
 
         <div class="crop-modal-footer">
-          <button class="btn btn-secondary" @click="closeCropModal">取消</button>
-          <button class="btn" @click="applyCrop" :disabled="!cropImage">裁剪并保存</button>
+          <button class="nes-btn" @click="closeCropModal"><span class="cjk">取消</span></button>
+          <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="2" y="7" width="3" height="3"/>
+                <rect x="4" y="9" width="3" height="3"/>
+                <rect x="6" y="7" width="3" height="3"/>
+                <rect x="8" y="5" width="3" height="3"/>
+                <rect x="10" y="3" width="3" height="3"/>
+              </svg>
+              <span class="cjk">裁剪并保存</span>
+            </span>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    const { createApp, ref, computed, watch, nextTick } = Vue;
-
-    createApp({
-      setup() {
-        const fileInput = ref(null);
-        const mainCanvas = ref(null);
-        const previewContainer = ref(null);
-        const originalImage = ref(null);
-        const pixelWidth = ref(52);
-        const pixelHeight = ref(52);
-        const cellSize = ref(20);
-        const rulerWidth = ref(40);
-        const rulerHeight = ref(24);
-        const scale = ref(1);
-        const pixelData = ref(null);
-        const hoveredPixel = ref(null);
-        const selectedPixel = ref(null);
-        const drawerOpen = ref(false);
-        const isDragging = ref(false);
-        const isDraggingOver = ref(false);
-        const offsetX = ref(0);
-        const offsetY = ref(0);
-        const lastMouseX = ref(0);
-        const lastMouseY = ref(0);
-
-        // 图片裁剪弹窗
-        const cropModalOpen = ref(false);
-        const cropImage = ref(null);
-        const cropImageSrc = ref('');
-        const cropImageEl = ref(null);
-        const cropStage = ref(null);
-        const cropAspectRatio = ref(null);
-        const activeRatio = ref('');
-        const cropType = ref('free');
-        const customRatioW = ref(1);
-        const customRatioH = ref(1);
-        const customPxW = ref(1);
-        const customPxH = ref(1);
-        const cropRect = ref({ x: 0, y: 0, w: 100, h: 100 });
-        const cropDragMode = ref(null);
-        const cropDragStart = ref({ mouseX: 0, mouseY: 0, rect: { x: 0, y: 0, w: 0, h: 0 } });
-        const cropFlipH = ref(false);
-        const cropFlipV = ref(false);
-
-        const cropTransform = computed(() => {
-          const parts = [];
-          if (cropFlipH.value) parts.push('scaleX(-1)');
-          if (cropFlipV.value) parts.push('scaleY(-1)');
-          return parts.join(' ');
-        });
-
-        const presetRatios = [
-          { label: '1:1', ratio: 1 },
-          { label: '4:3', ratio: 4 / 3 },
-          { label: '3:4', ratio: 3 / 4 },
-          { label: '16:9', ratio: 16 / 9 },
-          { label: '9:16', ratio: 9 / 16 },
-          { label: '3:2', ratio: 3 / 2 },
-          { label: '2:3', ratio: 2 / 3 }
-        ];
-        const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
-
-        const cropBoxStyle = computed(() => ({
-          left: cropRect.value.x + 'px',
-          top: cropRect.value.y + 'px',
-          width: cropRect.value.w + 'px',
-          height: cropRect.value.h + 'px'
-        }));
-
-        const canvasWidth = computed(() => pixelWidth.value * cellSize.value + rulerWidth.value);
-        const canvasHeight = computed(() => pixelHeight.value * cellSize.value + rulerHeight.value);
-
-        const processFile = (file) => {
-          if (!file) return;
-
-          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp', 'image/gif'];
-          const maxSize = 20 * 1024 * 1024;
-
-          if (!allowedTypes.includes(file.type)) {
-            alert('不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片');
-            fileInput.value = '';
-            return;
-          }
-
-          if (file.size > maxSize) {
-            alert('图片文件过大，请上传小于 20MB 的图片');
-            fileInput.value = '';
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-              originalImage.value = img;
-              imageInfo.value = { width: img.width, height: img.height };
-              nextTick(() => {
-                generatePixelArt();
-              });
-            };
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        };
-
-        const handleImageUpload = (event) => {
-          processFile(event.target.files[0]);
-        };
-
-        const triggerFileInput = () => {
-          fileInput.value?.click();
-        };
-
-        const onDragOver = () => {
-          isDraggingOver.value = true;
-        };
-
-        const onDragLeave = () => {
-          isDraggingOver.value = false;
-        };
-
-        const handleDrop = (event) => {
-          isDraggingOver.value = false;
-          processFile(event.dataTransfer.files[0]);
-        };
-
-        const imageInfo = ref(null);
-        const imageRatio = computed(() => {
-          if (!imageInfo.value) return '';
-          const { width, height } = imageInfo.value;
-          const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-          const g = gcd(width, height);
-          return `${width} × ${height} (${width/g}:${height/g})`;
-        });
-
-        /**
-         * 根据像素坐标获取颜色信息
-         * @param {Object} pixel - 像素坐标对象 {x, y}
-         * @returns {Object|null} 颜色对象 {r, g, b, hex} 或 null
-         */
-        const getPixelColor = (pixel) => {
-          if (!pixel || !pixelData.value) return null;
-          const { x, y } = pixel;
-          const i = (y * pixelWidth.value + x) * 4;
-          const r = pixelData.value.data[i];
-          const g = pixelData.value.data[i + 1];
-          const b = pixelData.value.data[i + 2];
-          const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-          return { r, g, b, hex };
-        };
-
-        const hoveredPixelColor = computed(() => getPixelColor(hoveredPixel.value));
-        const selectedPixelColor = computed(() => getPixelColor(selectedPixel.value));
-        const colorCount = ref(256);
-        let originalPixelData = null;
-
-        const applyColorQuantization = () => {
-          if (!originalPixelData) return;
-          
-          const data = originalPixelData.data;
-          const w = pixelWidth.value;
-          const h = pixelHeight.value;
-          
-          const colorMap = new Map();
-          for (let i = 0; i < data.length; i += 4) {
-            if (data[i + 3] < 128) continue;
-            const r = data[i] >> 3;
-            const g = data[i + 1] >> 3;
-            const b = data[i + 2] >> 3;
-            const key = (r << 10) | (g << 5) | b;
-            colorMap.set(key, (colorMap.get(key) || 0) + 1);
-          }
-          
-          const sortedColors = [...colorMap.entries()]
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, colorCount.value)
-            .map(([key]) => ({
-              r: (key >> 10 & 31) << 3,
-              g: (key >> 5 & 31) << 3,
-              b: (key & 31) << 3
-            }));
-          
-          const newData = new Uint8ClampedArray(data.length);
-          for (let i = 0; i < data.length; i += 4) {
-            if (data[i + 3] < 128) {
-              newData[i] = 0;
-              newData[i + 1] = 0;
-              newData[i + 2] = 0;
-              newData[i + 3] = 0;
-              continue;
-            }
-            
-            let minDist = Infinity;
-            let closest = sortedColors[0] || { r: 0, g: 0, b: 0 };
-            
-            for (const color of sortedColors) {
-              const dr = data[i] - color.r;
-              const dg = data[i + 1] - color.g;
-              const db = data[i + 2] - color.b;
-              const dist = dr * dr + dg * dg + db * db;
-              if (dist < minDist) {
-                minDist = dist;
-                closest = color;
-              }
-            }
-            
-            newData[i] = closest.r;
-            newData[i + 1] = closest.g;
-            newData[i + 2] = closest.b;
-            newData[i + 3] = 255;
-          }
-          
-          pixelData.value = new ImageData(newData, w, h);
-          renderCanvas();
-        };
-
-        /**
-         * 水平翻转像素图
-         * 将像素数据左右镜像翻转，并重新应用颜色量化
-         */
-        const flipHorizontal = () => {
-          if (!pixelData.value) return;
-
-          const data = pixelData.value.data;
-          const newData = new Uint8ClampedArray(data.length);
-          const w = pixelWidth.value;
-          const h = pixelHeight.value;
-          
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const srcIdx = (y * w + x) * 4;
-              const dstIdx = (y * w + (w - 1 - x)) * 4;
-              newData[dstIdx] = data[srcIdx];
-              newData[dstIdx + 1] = data[srcIdx + 1];
-              newData[dstIdx + 2] = data[srcIdx + 2];
-              newData[dstIdx + 3] = data[srcIdx + 3];
-            }
-          }
-          
-          pixelData.value = new ImageData(newData, w, h);
-          originalPixelData = pixelData.value;
-          if (colorCount.value < 256) {
-            applyColorQuantization();
-          } else {
-            renderCanvas();
-          }
-        };
-
-        /**
-         * 垂直翻转像素图
-         * 将像素数据上下镜像翻转，并重新应用颜色量化
-         */
-        const flipVertical = () => {
-          if (!pixelData.value) return;
-
-          const data = pixelData.value.data;
-          const newData = new Uint8ClampedArray(data.length);
-          const w = pixelWidth.value;
-          const h = pixelHeight.value;
-          
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const srcIdx = (y * w + x) * 4;
-              const dstIdx = ((h - 1 - y) * w + x) * 4;
-              newData[dstIdx] = data[srcIdx];
-              newData[dstIdx + 1] = data[srcIdx + 1];
-              newData[dstIdx + 2] = data[srcIdx + 2];
-              newData[dstIdx + 3] = data[srcIdx + 3];
-            }
-          }
-          
-          pixelData.value = new ImageData(newData, w, h);
-          originalPixelData = pixelData.value;
-          if (colorCount.value < 256) {
-            applyColorQuantization();
-          } else {
-            renderCanvas();
-          }
-        };
-
-        /**
-         * 根据设置的宽高重新采样原始图片生成像素画
-         * 支持按比例裁剪图片以适应目标尺寸
-         */
-        const generatePixelArt = () => {
-          if (!originalImage.value) return;
-
-          const img = originalImage.value;
-          const tempCanvas = document.createElement('canvas');
-          const tempCtx = tempCanvas.getContext('2d');
-
-          tempCanvas.width = pixelWidth.value;
-          tempCanvas.height = pixelHeight.value;
-
-          const imgAspect = img.width / img.height;
-          const canvasAspect = pixelWidth.value / pixelHeight.value;
-
-          let drawX = 0, drawY = 0;
-          let drawWidth = img.width;
-          let drawHeight = img.height;
-
-          if (imgAspect > canvasAspect) {
-            drawWidth = img.height * canvasAspect;
-            drawX = (img.width - drawWidth) / 2;
-          } else {
-            drawHeight = img.width / canvasAspect;
-            drawY = (img.height - drawHeight) / 2;
-          }
-
-          tempCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight, 0, 0, pixelWidth.value, pixelHeight.value);
-
-          pixelData.value = tempCtx.getImageData(0, 0, pixelWidth.value, pixelHeight.value);
-          originalPixelData = pixelData.value;
-          
-          if (colorCount.value < 256) {
-            applyColorQuantization();
-          } else {
-            renderCanvas();
-          }
-        };
-
-        /**
-         * 渲染画布：绘制背景、标尺、像素点、网格
-         */
-        const renderCanvas = () => {
-          if (!mainCanvas.value || !pixelData.value) return;
-
-          const canvas = mainCanvas.value;
-          const ctx = canvas.getContext('2d');
-          const data = pixelData.value.data;
-
-          ctx.fillStyle = '#0f3460';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          drawRuler(ctx);
-
-          for (let y = 0; y < pixelHeight.value; y++) {
-            for (let x = 0; x < pixelWidth.value; x++) {
-              const i = (y * pixelWidth.value + x) * 4;
-              const r = data[i];
-              const g = data[i + 1];
-              const b = data[i + 2];
-              const a = data[i + 3];
-
-              ctx.fillStyle = a < 128
-                ? 'transparent'
-                : `rgba(${r}, ${g}, ${b}, 1)`;
-
-              ctx.fillRect(
-                rulerWidth.value + x * cellSize.value,
-                rulerHeight.value + y * cellSize.value,
-                cellSize.value,
-                cellSize.value
-              );
-            }
-          }
-
-          drawGrid(ctx);
-        };
-
-        /**
-         * 绘制左上角标尺区域
-         * @param {CanvasRenderingContext2D} ctx - 画布上下文
-         */
-        const drawRuler = (ctx) => {
-          ctx.fillStyle = '#0f3460';
-          ctx.fillRect(0, 0, rulerWidth.value, rulerHeight.value);
-
-          ctx.strokeStyle = '#00d9ff';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(rulerWidth.value, 0);
-          ctx.lineTo(rulerWidth.value, canvasHeight.value);
-          ctx.moveTo(0, rulerHeight.value);
-          ctx.lineTo(canvasWidth.value, rulerHeight.value);
-          ctx.stroke();
-
-          ctx.fillStyle = '#00d9ff';
-          ctx.font = '12px Microsoft YaHei';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-
-          for (let x = 0; x < pixelWidth.value; x++) {
-            const labelX = rulerWidth.value + x * cellSize.value + cellSize.value / 2;
-            ctx.fillText((x + 1).toString(), labelX, rulerHeight.value / 2);
-          }
-
-          ctx.textAlign = 'right';
-          for (let y = 0; y < pixelHeight.value; y++) {
-            const labelY = rulerHeight.value + y * cellSize.value + cellSize.value / 2;
-            ctx.fillText((y + 1).toString(), rulerWidth.value - 5, labelY);
-          }
-        };
-
-        /**
-         * 绘制像素网格线
-         * @param {CanvasRenderingContext2D} ctx - 画布上下文
-         */
-        const drawGrid = (ctx) => {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-          ctx.lineWidth = 1;
-
-          for (let x = 0; x <= pixelWidth.value; x++) {
-            ctx.beginPath();
-            ctx.moveTo(rulerWidth.value + x * cellSize.value, rulerHeight.value);
-            ctx.lineTo(rulerWidth.value + x * cellSize.value, rulerHeight.value + pixelHeight.value * cellSize.value);
-            ctx.stroke();
-          }
-
-          for (let y = 0; y <= pixelHeight.value; y++) {
-            ctx.beginPath();
-            ctx.moveTo(rulerWidth.value, rulerHeight.value + y * cellSize.value);
-            ctx.lineTo(rulerWidth.value + pixelWidth.value * cellSize.value, rulerHeight.value + y * cellSize.value);
-            ctx.stroke();
-          }
-        };
-
-        const handleWheel = (event) => {
-          const delta = event.deltaY > 0 ? -0.1 : 0.1;
-          const newScale = Math.max(0.2, Math.min(5, scale.value + delta));
-          scale.value = parseFloat(newScale.toFixed(1));
-        };
-
-        const downloadPixelArt = () => {
-          if (!pixelData.value) return;
-
-          const downloadCanvas = document.createElement('canvas');
-          const downloadCtx = downloadCanvas.getContext('2d');
-          downloadCanvas.width = pixelWidth.value * cellSize.value;
-          downloadCanvas.height = pixelHeight.value * cellSize.value;
-
-          const data = pixelData.value.data;
-
-          for (let y = 0; y < pixelHeight.value; y++) {
-            for (let x = 0; x < pixelWidth.value; x++) {
-              const i = (y * pixelWidth.value + x) * 4;
-              const r = data[i];
-              const g = data[i + 1];
-              const b = data[i + 2];
-              const a = data[i + 3];
-
-              downloadCtx.fillStyle = a < 128
-                ? 'transparent'
-                : `rgba(${r}, ${g}, ${b}, 1)`;
-
-              downloadCtx.fillRect(
-                x * cellSize.value,
-                y * cellSize.value,
-                cellSize.value,
-                cellSize.value
-              );
-            }
-          }
-
-          const link = document.createElement('a');
-          link.download = `拼豆像素画_${pixelWidth.value}x${pixelHeight.value}.png`;
-          link.href = downloadCanvas.toDataURL('image/png');
-          link.click();
-        };
-
-        /**
-         * 将鼠标事件坐标转换为像素坐标
-         * @param {MouseEvent} event - 鼠标事件
-         * @returns {Object|null} 像素坐标 {x, y} 或超出范围时返回 null
-         */
-        const getPixelCoordsFromEvent = (event) => {
-          const rect = mainCanvas.value.getBoundingClientRect();
-          const scaleX = rect.width / canvasWidth.value;
-          const scaleY = rect.height / canvasHeight.value;
-
-          const x = (event.clientX - rect.left) / scaleX;
-          const y = (event.clientY - rect.top) / scaleY;
-
-          const px = Math.floor((x - rulerWidth.value) / cellSize.value);
-          const py = Math.floor((y - rulerHeight.value) / cellSize.value);
-
-          if (px >= 0 && px < pixelWidth.value && py >= 0 && py < pixelHeight.value) {
-            return { x: px, y: py };
-          }
-          return null;
-        };
-
-        /**
-         * 处理画布点击事件：选中/取消选中像素点
-         */
-        const handleCanvasClick = (event) => {
-          const coords = getPixelCoordsFromEvent(event);
-          if (!coords) return;
-
-          if (selectedPixel.value && selectedPixel.value.x === coords.x && selectedPixel.value.y === coords.y) {
-            selectedPixel.value = null;
-          } else {
-            selectedPixel.value = coords;
-          }
-        };
-
-        /**
-         * 处理画布鼠标移动事件：更新悬浮像素点
-         */
-        const handleCanvasHover = (event) => {
-          hoveredPixel.value = getPixelCoordsFromEvent(event);
-        };
-
-        const handleCanvasLeave = () => {
-          hoveredPixel.value = null;
-        };
-
-        /** 切换抽屉面板展开/收起 */
-        const toggleDrawer = () => {
-          drawerOpen.value = !drawerOpen.value;
-        };
-
-        /** 鼠标按下：开始拖拽画布 */
-        const handleMouseDown = (event) => {
-          if (event.button === 0) {
-            isDragging.value = true;
-            lastMouseX.value = event.clientX;
-            lastMouseY.value = event.clientY;
-          }
-        };
-
-        /** 鼠标移动：拖拽画布 */
-        const handleMouseMove = (event) => {
-          if (isDragging.value) {
-            const deltaX = event.clientX - lastMouseX.value;
-            const deltaY = event.clientY - lastMouseY.value;
-            offsetX.value += deltaX;
-            offsetY.value += deltaY;
-            lastMouseX.value = event.clientX;
-            lastMouseY.value = event.clientY;
-          }
-        };
-
-        /** 鼠标释放：停止拖拽 */
-        const handleMouseUp = () => {
-          isDragging.value = false;
-        };
-
-        /** 重置画布位置到原点 */
-        const resetPosition = () => {
-          offsetX.value = 0;
-          offsetY.value = 0;
-        };
-
-        // ==================== 图片裁剪 ====================
-
-        /** 打开裁剪弹窗，重置裁剪状态 */
-        const openCropModal = () => {
-          cropModalOpen.value = true;
-          cropImage.value = null;
-          cropImageSrc.value = '';
-          cropAspectRatio.value = null;
-          activeRatio.value = '';
-          cropType.value = 'free';
-          cropRect.value = { x: 0, y: 0, w: 100, h: 100 };
-          cropDragMode.value = null;
-          cropFlipH.value = false;
-          cropFlipV.value = false;
-        };
-
-        /** 关闭裁剪弹窗 */
-        const closeCropModal = () => {
-          cropModalOpen.value = false;
-          cropImage.value = null;
-          cropImageSrc.value = '';
-        };
-
-        /** 获取图片在 stage 内的显示位置与尺寸 */
-        const getCropImgRect = () => {
-          if (!cropImageEl.value || !cropStage.value) return null;
-          const imgRect = cropImageEl.value.getBoundingClientRect();
-          const stageRect = cropStage.value.getBoundingClientRect();
-          return {
-            left: imgRect.left - stageRect.left,
-            top: imgRect.top - stageRect.top,
-            width: imgRect.width,
-            height: imgRect.height
-          };
-        };
-
-        /** 初始化裁剪框（按图片显示尺寸居中，占 80% 或满足比例） */
-        const initCropRect = () => {
-          const ir = getCropImgRect();
-          if (!ir) return;
-
-          let w, h;
-          if (cropAspectRatio.value) {
-            const ratio = cropAspectRatio.value;
-            if (ir.width / ir.height > ratio) {
-              h = ir.height;
-              w = h * ratio;
-            } else {
-              w = ir.width;
-              h = w / ratio;
-            }
-          } else {
-            w = ir.width * 0.8;
-            h = ir.height * 0.8;
-          }
-          const x = ir.left + (ir.width - w) / 2;
-          const y = ir.top + (ir.height - h) / 2;
-          cropRect.value = { x, y, w, h };
-        };
-
-        /** 上传裁剪图片 */
-        const handleCropImageUpload = (event) => {
-          const file = event.target.files[0];
-          if (!file) return;
-
-          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp', 'image/gif'];
-          const maxSize = 20 * 1024 * 1024;
-          if (!allowedTypes.includes(file.type)) {
-            alert('不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片');
-            return;
-          }
-          if (file.size > maxSize) {
-            alert('图片文件过大，请上传小于 20MB 的图片');
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-              cropImage.value = img;
-              cropImageSrc.value = e.target.result;
-              nextTick(() => {
-                initCropRect();
-              });
-            };
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        };
-
-        /** 设置预设比例 */
-        const setPresetRatio = (p) => {
-          activeRatio.value = p.label;
-          cropAspectRatio.value = p.ratio;
-          fitCropRectToRatio();
-        };
-
-        /** 切换裁剪类型：自由 / 宽高比 / 像素比 */
-        const setCropType = (type) => {
-          cropType.value = type;
-          if (type === 'free') {
-            cropAspectRatio.value = null;
-            activeRatio.value = '';
-          } else if (type === 'ratio') {
-            // 有预设则按预设，否则用当前自定义比例
-            if (activeRatio.value) {
-              const p = presetRatios.find((r) => r.label === activeRatio.value);
-              cropAspectRatio.value = p ? p.ratio : 1;
-            } else if (customRatioW.value > 0 && customRatioH.value > 0) {
-              cropAspectRatio.value = customRatioW.value / customRatioH.value;
-            } else {
-              cropAspectRatio.value = 1;
-            }
-            fitCropRectToRatio();
-          } else if (type === 'pixel') {
-            if (customPxW.value > 0 && customPxH.value > 0) {
-              cropAspectRatio.value = customPxW.value / customPxH.value;
-            } else {
-              cropAspectRatio.value = 1;
-            }
-            activeRatio.value = '';
-            fitCropRectToRatio();
-          }
-        };
-
-        /** 应用自定义比例 */
-        const applyCustomRatio = () => {
-          if (customRatioW.value > 0 && customRatioH.value > 0) {
-            cropAspectRatio.value = customRatioW.value / customRatioH.value;
-            activeRatio.value = '';
-            fitCropRectToRatio();
-          }
-        };
-
-        /** 应用自定义宽高像素（等价锁定比例） */
-        const applyCustomPixels = () => {
-          if (customPxW.value > 0 && customPxH.value > 0) {
-            cropAspectRatio.value = customPxW.value / customPxH.value;
-            activeRatio.value = '';
-            fitCropRectToRatio();
-          }
-        };
-
-        /** 让当前裁剪框按锁定比例调整（保持中心与最大可用范围） */
-        const fitCropRectToRatio = () => {
-          const ir = getCropImgRect();
-          if (!ir) return;
-          const ratio = cropAspectRatio.value;
-          if (!ratio) return;
-
-          const cx = cropRect.value.x + cropRect.value.w / 2;
-          const cy = cropRect.value.y + cropRect.value.h / 2;
-
-          let w, h;
-          if (ir.width / ir.height > ratio) {
-            h = ir.height;
-            w = h * ratio;
-          } else {
-            w = ir.width;
-            h = w / ratio;
-          }
-
-          let x = cx - w / 2;
-          let y = cy - h / 2;
-          x = Math.max(ir.left, Math.min(x, ir.left + ir.width - w));
-          y = Math.max(ir.top, Math.min(y, ir.top + ir.height - h));
-          cropRect.value = { x, y, w, h };
-        };
-
-        /** 开始移动裁剪框 */
-        const startMoveCrop = (event) => {
-          cropDragMode.value = 'move';
-          cropDragStart.value = {
-            mouseX: event.clientX,
-            mouseY: event.clientY,
-            rect: { ...cropRect.value }
-          };
-        };
-
-        /** 开始缩放手柄 */
-        const startResizeCrop = (handle, event) => {
-          cropDragMode.value = handle;
-          cropDragStart.value = {
-            mouseX: event.clientX,
-            mouseY: event.clientY,
-            rect: { ...cropRect.value }
-          };
-        };
-
-        /** 裁剪区域鼠标按下（空区域无操作） */
-        const handleCropMouseDown = () => {};
-
-        /** 裁剪区域鼠标移动 */
-        const handleCropMouseMove = (event) => {
-          if (!cropDragMode.value) return;
-
-          const ir = getCropImgRect();
-          if (!ir) return;
-
-          const dx = event.clientX - cropDragStart.value.mouseX;
-          const dy = event.clientY - cropDragStart.value.mouseY;
-          const start = cropDragStart.value.rect;
-          const mode = cropDragMode.value;
-          const ratio = cropAspectRatio.value;
-
-          const minSize = 10;
-          let x = start.x;
-          let y = start.y;
-          let w = start.w;
-          let h = start.h;
-
-          if (mode === 'move') {
-            x = start.x + dx;
-            y = start.y + dy;
-            x = Math.max(ir.left, Math.min(x, ir.left + ir.width - w));
-            y = Math.max(ir.top, Math.min(y, ir.top + ir.height - h));
-            cropRect.value = { x, y, w, h };
-            return;
-          }
-
-          // 缩放
-          const growsLeft = mode.includes('w');
-          const growsRight = mode.includes('e');
-          const growsTop = mode.includes('n');
-          const growsBottom = mode.includes('s');
-
-          let left = start.x;
-          let right = start.x + start.w;
-          let top = start.y;
-          let bottom = start.y + start.h;
-
-          if (growsLeft) left = start.x + dx;
-          if (growsRight) right = start.x + start.w + dx;
-          if (growsTop) top = start.y + dy;
-          if (growsBottom) bottom = start.y + start.h + dy;
-
-          // 边界约束
-          left = Math.max(ir.left, Math.min(left, right - minSize));
-          right = Math.min(ir.left + ir.width, Math.max(right, left + minSize));
-          top = Math.max(ir.top, Math.min(top, bottom - minSize));
-          bottom = Math.min(ir.top + ir.height, Math.max(bottom, top + minSize));
-
-          w = right - left;
-          h = bottom - top;
-
-          // 比例锁定
-          if (ratio) {
-            // 以对角锚点或中心调整比例
-            if (growsLeft && growsTop) {
-              // 固定右下角
-              const bw = Math.max(w, h * ratio);
-              const bh = Math.max(w / ratio, h);
-              if (bw / bh > ratio) { w = bh * ratio; h = bh; } else { h = bw / ratio; w = bw; }
-              left = right - w;
-              top = bottom - h;
-            } else if (growsRight && growsBottom) {
-              // 固定左上角
-              const bw = Math.max(w, h * ratio);
-              const bh = Math.max(w / ratio, h);
-              if (bw / bh > ratio) { w = bh * ratio; h = bh; } else { h = bw / ratio; w = bw; }
-              right = left + w;
-              bottom = top + h;
-            } else if (growsRight && growsTop) {
-              // 固定左下角
-              w = h * ratio;
-              right = left + w;
-              top = bottom - h;
-            } else if (growsLeft && growsBottom) {
-              // 固定右上角
-              w = h * ratio;
-              left = right - w;
-              bottom = top + h;
-            } else {
-              // 单边手柄，按比例调整另一边（保持中心）
-              if (growsLeft || growsRight) {
-                h = w / ratio;
-                const centerY = top + h / 2;
-                top = centerY - h / 2;
-                bottom = top + h;
-              } else {
-                w = h * ratio;
-                const centerX = left + w / 2;
-                left = centerX - w / 2;
-                right = left + w;
-              }
-              // 再次边界约束
-              if (left < ir.left) { left = ir.left; right = left + w; }
-              if (right > ir.left + ir.width) { right = ir.left + ir.width; w = right - left; h = w / ratio; }
-              if (top < ir.top) { top = ir.top; bottom = top + h; }
-              if (bottom > ir.top + ir.height) { bottom = ir.top + ir.height; h = bottom - top; w = h * ratio; }
-            }
-          }
-
-          x = left;
-          y = top;
-          cropRect.value = { x, y, w, h };
-        };
-
-        /** 裁剪区域鼠标释放 */
-        const handleCropMouseUp = () => {
-          cropDragMode.value = null;
-        };
-
-        /** 确认裁剪并保存到本地 */
-        const applyCrop = () => {
-          if (!cropImage.value) return;
-
-          const ir = getCropImgRect();
-          if (!ir) return;
-
-          const scale = cropImage.value.naturalWidth / ir.width;
-          const sx = (cropRect.value.x - ir.left) * scale;
-          const sy = (cropRect.value.y - ir.top) * scale;
-          const sw = cropRect.value.w * scale;
-          const sh = cropRect.value.h * scale;
-
-          // 像素比模式：输出尺寸严格等于用户输入的宽×高
-          let outW, outH;
-          if (cropType.value === 'pixel' && customPxW.value > 0 && customPxH.value > 0) {
-            outW = customPxW.value;
-            outH = customPxH.value;
-          } else {
-            outW = Math.round(sw);
-            outH = Math.round(sh);
-          }
-
-          const outCanvas = document.createElement('canvas');
-          outCanvas.width = outW;
-          outCanvas.height = outH;
-          const ctx = outCanvas.getContext('2d');
-
-          // 应用翻转：翻转输出画布，使裁剪结果与预览中看到的翻转后图像一致
-          ctx.save();
-          if (cropFlipH.value) {
-            ctx.translate(outW, 0);
-            ctx.scale(-1, 1);
-          }
-          if (cropFlipV.value) {
-            ctx.translate(0, outH);
-            ctx.scale(1, -1);
-          }
-          ctx.drawImage(cropImage.value, sx, sy, sw, sh, 0, 0, outW, outH);
-          ctx.restore();
-
-          const link = document.createElement('a');
-          link.download = `拼豆裁剪_${outW}x${outH}.png`;
-          link.href = outCanvas.toDataURL('image/png');
-          link.click();
-
-          closeCropModal();
-        };
-
-        /** 监听尺寸变化，重新渲染画布 */
-        watch([pixelWidth, pixelHeight, cellSize], () => {
-          if (pixelData.value) {
-            renderCanvas();
-          }
-        });
-
-        return {
-          fileInput,
-          mainCanvas,
-          previewContainer,
-          originalImage,
-          drawerOpen,
-          isDragging,
-          offsetX,
-          offsetY,
-          pixelWidth,
-          pixelHeight,
-          cellSize,
-          rulerWidth,
-          rulerHeight,
-          scale,
-          canvasWidth,
-          canvasHeight,
-          pixelData,
-          hoveredPixel,
-          hoveredPixelColor,
-          selectedPixelColor,
-          selectedPixel,
-          handleImageUpload,
-          imageInfo,
-          imageRatio,
-          generatePixelArt,
-          flipHorizontal,
-          flipVertical,
-          colorCount,
-          applyColorQuantization,
-          handleWheel,
-          downloadPixelArt,
-          handleCanvasClick,
-          handleCanvasHover,
-          handleCanvasLeave,
-          toggleDrawer,
-          resetPosition,
-          handleMouseDown,
-          handleMouseMove,
-          handleMouseUp,
-          triggerFileInput,
-          onDragOver,
-          onDragLeave,
-          handleDrop,
-          cropModalOpen,
-          cropImage,
-          cropImageSrc,
-          cropImageEl,
-          cropStage,
-          cropRect,
-          cropBoxStyle,
-          cropAspectRatio,
-          activeRatio,
-          cropType,
-          presetRatios,
-          handles,
-          customRatioW,
-          customRatioH,
-          customPxW,
-          customPxH,
-          openCropModal,
-          closeCropModal,
-          handleCropImageUpload,
-          setPresetRatio,
-          setCropType,
-          applyCustomRatio,
-          applyCustomPixels,
-          startMoveCrop,
-          startResizeCrop,
-          handleCropMouseDown,
-          handleCropMouseMove,
-          handleCropMouseUp,
-          cropFlipH,
-          cropFlipV,
-          cropTransform,
-          applyCrop
-        };
-      }
-    }).mount('#app');
-  </script>
+  <script src="./js/state.js"></script>
+  <script src="./js/pixel.js"></script>
+  <script src="./js/view.js"></script>
+  <script src="./js/crop.js"></script>
+  <script src="./js/app.js"></script>
 </body>
 </html>
