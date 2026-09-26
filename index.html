@@ -488,6 +488,51 @@
     .crop-handle.s  { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
     .crop-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
     .crop-handle.w  { top: 50%; left: -5px; transform: translateY(-50%); cursor: ew-resize; }
+    .crop-flip-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 15px;
+    }
+    .crop-flip-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #aaa;
+      cursor: pointer;
+      user-select: none;
+    }
+    .crop-switch {
+      position: relative;
+      width: 42px;
+      height: 22px;
+      background: #0f3460;
+      border-radius: 11px;
+      border: 1px solid #00d9ff;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .crop-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .crop-flip-item.active .crop-switch {
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
+      border-color: transparent;
+    }
+    .crop-flip-item.active .crop-switch::after {
+      transform: translateX(20px);
+    }
+    .crop-flip-item.active {
+      color: #00ff88;
+    }
     .crop-modal-footer {
       display: flex;
       justify-content: flex-end;
@@ -629,6 +674,19 @@
         </div>
 
         <template v-else>
+          <div class="crop-flip-group">
+            <label class="crop-flip-item" :class="{ active: cropFlipH }">
+              水平翻转
+              <span class="crop-switch"></span>
+              <input type="checkbox" v-model="cropFlipH" style="display:none;">
+            </label>
+            <label class="crop-flip-item" :class="{ active: cropFlipV }">
+              垂直翻转
+              <span class="crop-switch"></span>
+              <input type="checkbox" v-model="cropFlipV" style="display:none;">
+            </label>
+          </div>
+
           <div class="crop-type-tabs">
             <button class="type-tab" :class="{ active: cropType === 'free' }" @click="setCropType('free')">自由</button>
             <button class="type-tab" :class="{ active: cropType === 'ratio' }" @click="setCropType('ratio')">宽高比</button>
@@ -667,7 +725,8 @@
           <div class="crop-stage" ref="cropStage"
                @mousedown="handleCropMouseDown" @mousemove="handleCropMouseMove"
                @mouseup="handleCropMouseUp" @mouseleave="handleCropMouseUp">
-            <img ref="cropImageEl" :src="cropImageSrc" class="crop-source-img" @dragstart.prevent>
+            <img ref="cropImageEl" :src="cropImageSrc" class="crop-source-img"
+                 :style="{ transform: cropTransform }" @dragstart.prevent>
             <div class="crop-box" :style="cropBoxStyle" @mousedown.stop.prevent="startMoveCrop">
               <div v-for="h in handles" :key="h" class="crop-handle"
                    :class="h" @mousedown.stop.prevent="startResizeCrop(h, $event)"></div>
@@ -725,6 +784,15 @@
         const cropRect = ref({ x: 0, y: 0, w: 100, h: 100 });
         const cropDragMode = ref(null);
         const cropDragStart = ref({ mouseX: 0, mouseY: 0, rect: { x: 0, y: 0, w: 0, h: 0 } });
+        const cropFlipH = ref(false);
+        const cropFlipV = ref(false);
+
+        const cropTransform = computed(() => {
+          const parts = [];
+          if (cropFlipH.value) parts.push('scaleX(-1)');
+          if (cropFlipV.value) parts.push('scaleY(-1)');
+          return parts.join(' ');
+        });
 
         const presetRatios = [
           { label: '1:1', ratio: 1 },
@@ -1231,6 +1299,8 @@
           cropType.value = 'free';
           cropRect.value = { x: 0, y: 0, w: 100, h: 100 };
           cropDragMode.value = null;
+          cropFlipH.value = false;
+          cropFlipV.value = false;
         };
 
         /** 关闭裁剪弹窗 */
@@ -1548,7 +1618,19 @@
           outCanvas.width = outW;
           outCanvas.height = outH;
           const ctx = outCanvas.getContext('2d');
+
+          // 应用翻转：翻转输出画布，使裁剪结果与预览中看到的翻转后图像一致
+          ctx.save();
+          if (cropFlipH.value) {
+            ctx.translate(outW, 0);
+            ctx.scale(-1, 1);
+          }
+          if (cropFlipV.value) {
+            ctx.translate(0, outH);
+            ctx.scale(1, -1);
+          }
           ctx.drawImage(cropImage.value, sx, sy, sw, sh, 0, 0, outW, outH);
+          ctx.restore();
 
           const link = document.createElement('a');
           link.download = `拼豆裁剪_${outW}x${outH}.png`;
@@ -1637,6 +1719,9 @@
           handleCropMouseDown,
           handleCropMouseMove,
           handleCropMouseUp,
+          cropFlipH,
+          cropFlipV,
+          cropTransform,
           applyCrop
         };
       }
