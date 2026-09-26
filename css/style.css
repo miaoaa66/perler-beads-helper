@@ -349,6 +349,8 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      /* 独立合成层：否则拖动画布时旧位置的边框像素不会被重绘掉，留下残影 */
+      will-change: transform;
     }
     .canvas-wrapper {
       position: relative;

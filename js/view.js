@@ -1,7 +1,7 @@
 (function (PBH) {
   'use strict';
   const {
-    scale, pixelData, pixelWidth, pixelHeight, cellSize, mainCanvas,
+    scale, pixelData, pixelWidth, pixelHeight, cellSize, mainCanvas, previewContainer,
     canvasWidth, canvasHeight, rulerWidth, rulerHeight,
     selectedPixel, hoveredPixel, isDragging, lastMouseX, lastMouseY, offsetX, offsetY
   } = PBH.state;
@@ -122,10 +122,35 @@
           isDragging.value = false;
         };
 
-        /** 重置画布位置到原点 */
+        /**
+         * 重置画布位置：能完整显示的方向居中，超出预览区的方向左上角对齐并留出内边距，
+         * 保证行号/列号标尺原点可见
+         */
         const resetPosition = () => {
-          offsetX.value = 0;
-          offsetY.value = 0;
+          const wrapper = mainCanvas.value && mainCanvas.value.parentElement;
+          const container = previewContainer.value;
+
+          if (!wrapper || !container) {
+            offsetX.value = 0;
+            offsetY.value = 0;
+            return;
+          }
+
+          const pad = 16;
+          const layoutW = wrapper.offsetWidth;
+          const layoutH = wrapper.offsetHeight;
+          const scaledW = layoutW * scale.value;
+          const scaledH = layoutH * scale.value;
+
+          // offsetLeft/Top 相对预览区 padding 边，且不受 transform 影响；
+          // transformOrigin 为 top left，故可视左上角 = 布局左上角 + 平移量
+          offsetX.value = scaledW <= container.clientWidth - pad * 2
+            ? container.clientWidth / 2 - wrapper.offsetLeft - scaledW / 2
+            : pad - wrapper.offsetLeft;
+
+          offsetY.value = scaledH <= container.clientHeight - pad * 2
+            ? container.clientHeight / 2 - wrapper.offsetTop - scaledH / 2
+            : pad - wrapper.offsetTop;
         };
 
   Object.assign(PBH.fn, {
