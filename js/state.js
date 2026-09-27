@@ -10,9 +10,9 @@ window.PBH = window.PBH || { state: {}, fn: {} };
         const originalImage = ref(null);
         const pixelWidth = ref(52);
         const pixelHeight = ref(52);
-        const cellSize = ref(20);
-        const rulerWidth = ref(40);
-        const rulerHeight = ref(24);
+        const cellSize = ref(36);
+        const rulerWidth = ref(48);
+        const rulerHeight = ref(26);
         const scale = ref(1);
         const pixelData = ref(null);
         const hoveredPixel = ref(null);
@@ -68,6 +68,17 @@ window.PBH = window.PBH || { state: {}, fn: {} };
         ];
         const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
+        // 常用豆板尺寸：选中后直接写入宽高输入框
+        const boardPreset = ref('');
+        const boardPresets = [
+          { label: '15×15 小方板', w: 15, h: 15 },
+          { label: '29×29 标准方板（5mm）', w: 29, h: 29 },
+          { label: '52×52 迷你方板（2.6mm）', w: 52, h: 52 },
+          { label: '58×58 四板拼接', w: 58, h: 58 },
+          { label: '78×78 迷你大方板（2.6mm）', w: 78, h: 78 },
+          { label: '104×104 迷你特大板（2.6mm）', w: 104, h: 104 }
+        ];
+
         const cropBoxStyle = computed(() => ({
           left: cropRect.value.x + 'px',
           top: cropRect.value.y + 'px',
@@ -93,7 +104,7 @@ window.PBH = window.PBH || { state: {}, fn: {} };
 
   // 状态装配：其他模块与 setup() 通过 PBH.state 共享同一批 ref / computed
   PBH.state = {
-    fileInput, cropFileInput, mainCanvas, previewContainer, originalImage, pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight, scale, pixelData, hoveredPixel, selectedPixel, isDragging, isDraggingOver, offsetX, offsetY, lastMouseX, lastMouseY, panelOpen, pixelFont, flipH, flipV, cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage, cropAspectRatio, activeRatio, cropType, customRatioW, customRatioH, customPxW, customPxH, cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropTransform, presetRatios, handles, cropBoxStyle, canvasWidth, canvasHeight, imageInfo, imageRatio, hoveredPixelColor, selectedPixelColor, colorCount
+    fileInput, cropFileInput, mainCanvas, previewContainer, originalImage, pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight, scale, pixelData, hoveredPixel, selectedPixel, isDragging, isDraggingOver, offsetX, offsetY, lastMouseX, lastMouseY, panelOpen, pixelFont, flipH, flipV, cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage, cropAspectRatio, activeRatio, cropType, customRatioW, customRatioH, customPxW, customPxH, cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropTransform, presetRatios, handles, boardPreset, boardPresets, cropBoxStyle, canvasWidth, canvasHeight, imageInfo, imageRatio, hoveredPixelColor, selectedPixelColor, colorCount
   };
 
         /** 监听尺寸变化，重新渲染画布 */

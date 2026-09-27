@@ -56,6 +56,10 @@
             <span class="px-x">×</span>
             <input type="number" class="px-input" :value="pixelHeight" min="5" max="200" step="1" @input="handleSizeInput($event, 'height')">
           </div>
+          <select class="px-input board-select" v-model="boardPreset" @change="applyBoardPreset">
+            <option value="">选择常用豆板尺寸</option>
+            <option v-for="p in boardPresets" :key="p.label" :value="p.label">{{ p.label }}</option>
+          </select>
         </div>
 
         <div class="control-group">
@@ -81,7 +85,7 @@
 
         <div class="control-group">
           <label class="px-label">▸ ZOOM <span class="cjk">缩放</span>: {{ Math.round(scale * 100) }}%</label>
-          <input type="range" class="px-range" v-model.number="scale" min="0.2" max="5" step="0.1">
+          <input type="range" class="px-range" v-model.number="scale" min="0.01" max="5" step="0.01">
         </div>
 
         <div class="control-group">

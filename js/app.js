@@ -1,8 +1,19 @@
 (function (PBH) {
   'use strict';
   const { createApp } = Vue;
-  const { pixelWidth, pixelHeight } = PBH.state;
+  const { pixelWidth, pixelHeight, boardPreset, boardPresets } = PBH.state;
   const { generatePixelArt } = PBH.fn;
+
+        /**
+         * 应用常用豆板尺寸：按所选预设写入宽高并重新生成像素画
+         */
+        const applyBoardPreset = () => {
+          const preset = boardPresets.find((p) => p.label === boardPreset.value);
+          if (!preset) return;
+          pixelWidth.value = preset.w;
+          pixelHeight.value = preset.h;
+          generatePixelArt();
+        };
 
         /**
          * 尺寸输入：只接受整数，输入小数时向下取整后回填
@@ -23,7 +34,7 @@
           generatePixelArt();
         };
 
-  Object.assign(PBH.fn, { handleSizeInput });
+  Object.assign(PBH.fn, { handleSizeInput, applyBoardPreset });
 
   createApp({
     setup() {
