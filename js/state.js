@@ -139,9 +139,69 @@ window.PBH = window.PBH || { state: {}, fn: {} };
         const selectedPixelColor = computed(() => PBH.fn.getPixelColor(selectedPixel.value));
         const colorCount = ref(256);
 
+        // ===== 真实豆色板 =====
+        // 色板数据由 palette.js 提供（在 state.js 之后加载），此处延迟读取
+        const paletteKey = ref('original');
+        const palettes = computed(() => PBH.palettes || {});
+        const activePalette = computed(() => (PBH.palettes && PBH.palettes[paletteKey.value]) || null);
+        const hasPaletteColors = computed(() => !!(activePalette.value && activePalette.value.colors.length));
+
+        /**
+         * 当前豆色板的 RGB → 色卡项索引
+         * 量化输出的是色板原色，故可用 RGB 精确匹配回色号 / 色名
+         */
+        const paletteColorIndex = computed(() => {
+          const index = new Map();
+          const palette = activePalette.value;
+          if (palette) {
+            palette.colors.forEach((c) => index.set((c.r << 16) | (c.g << 8) | c.b, c));
+          }
+          return index;
+        });
+
+        /**
+         * 用料清单：从 pixelData 派生（排除透明格），按用量降序，
+         * 并附带当前豆色板的色号 / 色名；导出图纸也复用同一份数据
+         */
+        const colorUsage = computed(() => {
+          if (!pixelData.value) return [];
+          const data = pixelData.value.data;
+          const grouped = new Map();
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] < 128) continue;
+            const key = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
+            const found = grouped.get(key);
+            if (found) {
+              found.count++;
+            } else {
+              grouped.set(key, { key, r: data[i], g: data[i + 1], b: data[i + 2], count: 1 });
+            }
+          }
+
+          const index = paletteColorIndex.value;
+          const list = [...grouped.values()].sort((a, b) => b.count - a.count);
+          list.forEach((item, i) => {
+            const matched = index.get(item.key);
+            item.hex = '#' + [item.r, item.g, item.b]
+              .map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+            item.code = matched ? matched.code : '';
+            item.name = matched ? matched.name : '';
+            // 无豆色板时用用量排名当作编号，图纸与清单保持一致
+            item.label = matched ? matched.code : String(i + 1);
+          });
+          return list;
+        });
+
+        const totalBeads = computed(() => colorUsage.value.reduce((sum, c) => sum + c.count, 0));
+
+        // 生成中的 loading 态与画布错误提示
+        const isGenerating = ref(false);
+        const canvasError = ref('');
+
   // 状态装配：其他模块与 setup() 通过 PBH.state 共享同一批 ref / computed
   PBH.state = {
-    fileInput, cropFileInput, mainCanvas, previewContainer, originalImage, pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight, scale, pixelData, hoveredPixel, selectedPixel, isDragging, isDraggingOver, offsetX, offsetY, lastMouseX, lastMouseY, panelOpen, pixelFont, flipH, flipV, cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage, cropAspectRatio, activeRatio, cropType, customRatioW, customRatioH, customPxW, customPxH, cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropTransform, presetRatios, handles, boardPreset, boardPresets, cropBoxStyle, cropImgRect, cropOutputSize, canvasWidth, canvasHeight, imageInfo, imageRatio, hoveredPixelColor, selectedPixelColor, colorCount
+    fileInput, cropFileInput, mainCanvas, previewContainer, originalImage, pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight, scale, pixelData, hoveredPixel, selectedPixel, isDragging, isDraggingOver, offsetX, offsetY, lastMouseX, lastMouseY, panelOpen, pixelFont, flipH, flipV, cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage, cropAspectRatio, activeRatio, cropType, customRatioW, customRatioH, customPxW, customPxH, cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropTransform, presetRatios, handles, boardPreset, boardPresets, cropBoxStyle, cropImgRect, cropOutputSize, canvasWidth, canvasHeight, imageInfo, imageRatio, hoveredPixelColor, selectedPixelColor, colorCount,
+    paletteKey, palettes, activePalette, hasPaletteColors, colorUsage, totalBeads, isGenerating, canvasError
   };
 
         /** 监听尺寸变化，重新渲染画布 */

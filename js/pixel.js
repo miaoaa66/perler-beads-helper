@@ -5,7 +5,9 @@
     fileInput, originalImage, isDraggingOver,
     pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight,
     pixelData, flipH, flipV, pixelFont, colorCount,
-    mainCanvas, imageInfo, canvasWidth, canvasHeight
+    mainCanvas, imageInfo, canvasWidth, canvasHeight,
+    hoveredPixel, selectedPixel, isGenerating, canvasError,
+    activePalette, hasPaletteColors
   } = PBH.state;
 
         const processFile = (file) => {
@@ -61,9 +63,26 @@
         };
 
         /**
+         * 在当前豆色板中按 RGB 精确匹配色卡项
+         * @param {number} r - 红
+         * @param {number} g - 绿
+         * @param {number} b - 蓝
+         * @returns {Object|null} 色卡项 {code, name, hex} 或 null
+         */
+        const findPaletteColor = (r, g, b) => {
+          const palette = activePalette.value;
+          if (!palette) return null;
+          const key = (r << 16) | (g << 8) | b;
+          for (const c of palette.colors) {
+            if (((c.r << 16) | (c.g << 8) | c.b) === key) return c;
+          }
+          return null;
+        };
+
+        /**
          * 根据像素坐标获取颜色信息
          * @param {Object} pixel - 像素坐标对象 {x, y}
-         * @returns {Object|null} 颜色对象 {r, g, b, hex} 或 null
+         * @returns {Object|null} 颜色对象 {r, g, b, hex, code, name} 或 null
          */
         const getPixelColor = (pixel) => {
           if (!pixel || !pixelData.value) return null;
@@ -73,70 +92,163 @@
           const g = pixelData.value.data[i + 1];
           const b = pixelData.value.data[i + 2];
           const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-          return { r, g, b, hex };
+          const matched = findPaletteColor(r, g, b);
+          return { r, g, b, hex, code: matched ? matched.code : '', name: matched ? matched.name : '' };
         };
 
         let originalPixelData = null;
 
-        const applyColorQuantization = () => {
+        /**
+         * 生成任务调度：先亮起 loading 态并让浏览器完成一次绘制，
+         * 再执行同步的重活，避免界面在计算期间假死且没有任何反馈
+         * @param {Function} task - 同步任务
+         */
+        let pendingTasks = 0;
+        const runTask = (task) => {
+          pendingTasks++;
+          isGenerating.value = true;
+          nextTick(() => {
+            // 双重 rAF：第一帧提交 DOM 更新，第二帧确保 loading 已绘制
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              try {
+                task();
+              } catch (err) {
+                canvasError.value = '生成失败：' + (err && err.message ? err.message : '未知错误');
+              } finally {
+                pendingTasks = Math.max(0, pendingTasks - 1);
+                if (pendingTasks === 0) isGenerating.value = false;
+              }
+            }));
+          });
+        };
+
+        /**
+         * 简单防抖：滑块连续拖动时只保留最后一次调用
+         * @param {Function} fn - 目标函数
+         * @param {number} wait - 等待毫秒数
+         * @returns {Function} 防抖后的函数
+         */
+        const debounce = (fn, wait) => {
+          let timer = null;
+          return (...args) => {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(() => {
+              timer = null;
+              fn(...args);
+            }, wait);
+          };
+        };
+
+        /**
+         * 颜色量化（同步核心）
+         * - 原始色模式：5bit 分桶统计，取用量前 colorCount 个色
+         * - 豆色板模式：先映射到色板最近色，再按用量取前 colorCount 个，
+         *   被淘汰的颜色就近回映射到保留色，保证只出现真实豆色
+         */
+        const quantizeColors = () => {
           if (!originalPixelData) return;
 
           const data = originalPixelData.data;
           const w = pixelWidth.value;
           const h = pixelHeight.value;
+          const paletteColors = hasPaletteColors.value ? activePalette.value.colors : null;
 
-          const colorMap = new Map();
-          for (let i = 0; i < data.length; i += 4) {
-            if (data[i + 3] < 128) continue;
-            const r = data[i] >> 3;
-            const g = data[i + 1] >> 3;
-            const b = data[i + 2] >> 3;
-            const key = (r << 10) | (g << 5) | b;
-            colorMap.set(key, (colorMap.get(key) || 0) + 1);
+          let candidates;
+          if (paletteColors) {
+            candidates = paletteColors.map((c) => ({ r: c.r, g: c.g, b: c.b, count: 0 }));
+          } else {
+            const colorMap = new Map();
+            for (let i = 0; i < data.length; i += 4) {
+              if (data[i + 3] < 128) continue;
+              const key = ((data[i] >> 3) << 10) | ((data[i + 1] >> 3) << 5) | (data[i + 2] >> 3);
+              colorMap.set(key, (colorMap.get(key) || 0) + 1);
+            }
+            candidates = [...colorMap.entries()]
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, colorCount.value)
+              .map(([key]) => ({
+                r: (key >> 10 & 31) << 3,
+                g: (key >> 5 & 31) << 3,
+                b: (key & 31) << 3,
+                count: 0
+              }));
           }
 
-          const sortedColors = [...colorMap.entries()]
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, colorCount.value)
-            .map(([key]) => ({
-              r: (key >> 10 & 31) << 3,
-              g: (key >> 5 & 31) << 3,
-              b: (key & 31) << 3
-            }));
-
+          // 逐像素映射到最近候选色，-1 表示透明格
           const newData = new Uint8ClampedArray(data.length);
-          for (let i = 0; i < data.length; i += 4) {
-            if (data[i + 3] < 128) {
-              newData[i] = 0;
-              newData[i + 1] = 0;
-              newData[i + 2] = 0;
-              newData[i + 3] = 0;
-              continue;
-            }
+          const assignment = new Int16Array(w * h).fill(-1);
+          for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+            if (data[i + 3] < 128) continue;
 
             let minDist = Infinity;
-            let closest = sortedColors[0] || { r: 0, g: 0, b: 0 };
-
-            for (const color of sortedColors) {
+            let best = 0;
+            for (let c = 0; c < candidates.length; c++) {
+              const color = candidates[c];
               const dr = data[i] - color.r;
               const dg = data[i + 1] - color.g;
               const db = data[i + 2] - color.b;
               const dist = dr * dr + dg * dg + db * db;
               if (dist < minDist) {
                 minDist = dist;
-                closest = color;
+                best = c;
               }
             }
+            candidates[best].count++;
+            assignment[p] = best;
+          }
 
-            newData[i] = closest.r;
-            newData[i + 1] = closest.g;
-            newData[i + 2] = closest.b;
+          // 豆色板模式：按用量裁剪到 colorCount 个色，其余像素就近回映射
+          if (paletteColors && candidates.length > colorCount.value) {
+            const kept = candidates
+              .map((c, i) => i)
+              .sort((a, b) => candidates[b].count - candidates[a].count)
+              .slice(0, colorCount.value);
+            const keptSet = new Set(kept);
+            const remap = new Map();
+            for (let i = 0; i < candidates.length; i++) {
+              if (keptSet.has(i)) continue;
+              let minDist = Infinity;
+              let best = kept[0];
+              for (const k of kept) {
+                const dr = candidates[i].r - candidates[k].r;
+                const dg = candidates[i].g - candidates[k].g;
+                const db = candidates[i].b - candidates[k].b;
+                const dist = dr * dr + dg * dg + db * db;
+                if (dist < minDist) {
+                  minDist = dist;
+                  best = k;
+                }
+              }
+              remap.set(i, best);
+            }
+            for (let p = 0; p < assignment.length; p++) {
+              if (assignment[p] >= 0 && remap.has(assignment[p])) {
+                assignment[p] = remap.get(assignment[p]);
+              }
+            }
+          }
+
+          for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+            const color = assignment[p] >= 0 ? candidates[assignment[p]] : null;
+            if (!color) continue; // 透明格保持全 0（alpha=0）
+            newData[i] = color.r;
+            newData[i + 1] = color.g;
+            newData[i + 2] = color.b;
             newData[i + 3] = 255;
           }
 
           pixelData.value = new ImageData(newData, w, h);
           renderCanvas();
         };
+
+        /** 应用颜色量化（对外入口，带 loading 态） */
+        const applyColorQuantization = () => {
+          if (!originalPixelData) return;
+          runTask(quantizeColors);
+        };
+
+        /** COLORS 滑块：防抖后量化，避免拖动过程中反复全量计算 */
+        const handleColorCountInput = debounce(applyColorQuantization, 120);
 
         /**
          * 根据设置的宽高重新采样原始图片生成像素画
@@ -145,47 +257,97 @@
         const generatePixelArt = () => {
           if (!originalImage.value) return;
 
-          const img = originalImage.value;
-          const tempCanvas = document.createElement('canvas');
-          const tempCtx = tempCanvas.getContext('2d');
+          // 尺寸/图片已变，清掉上一轮的悬浮与选中残留
+          hoveredPixel.value = null;
+          selectedPixel.value = null;
+          canvasError.value = '';
 
-          const w = pixelWidth.value;
-          const h = pixelHeight.value;
-          tempCanvas.width = w;
-          tempCanvas.height = h;
+          runTask(() => {
+            const img = originalImage.value;
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            if (!tempCtx) {
+              canvasError.value = '画布初始化失败：无法获取绘图上下文，请更换浏览器重试';
+              return;
+            }
 
-          const imgAspect = img.width / img.height;
-          const canvasAspect = w / h;
+            const w = pixelWidth.value;
+            const h = pixelHeight.value;
+            tempCanvas.width = w;
+            tempCanvas.height = h;
 
-          let drawX = 0, drawY = 0;
-          let drawWidth = img.width;
-          let drawHeight = img.height;
+            const imgAspect = img.width / img.height;
+            const canvasAspect = w / h;
 
-          if (imgAspect > canvasAspect) {
-            drawWidth = img.height * canvasAspect;
-            drawX = (img.width - drawWidth) / 2;
-          } else {
-            drawHeight = img.width / canvasAspect;
-            drawY = (img.height - drawHeight) / 2;
+            let drawX = 0, drawY = 0;
+            let drawWidth = img.width;
+            let drawHeight = img.height;
+
+            if (imgAspect > canvasAspect) {
+              drawWidth = img.height * canvasAspect;
+              drawX = (img.width - drawWidth) / 2;
+            } else {
+              drawHeight = img.width / canvasAspect;
+              drawY = (img.height - drawHeight) / 2;
+            }
+
+            // 以画布中心为轴镜像，保证像素对齐
+            if (flipH.value || flipV.value) {
+              tempCtx.translate(w / 2, h / 2);
+              tempCtx.scale(flipH.value ? -1 : 1, flipV.value ? -1 : 1);
+              tempCtx.translate(-w / 2, -h / 2);
+            }
+
+            tempCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight, 0, 0, w, h);
+
+            pixelData.value = tempCtx.getImageData(0, 0, w, h);
+            originalPixelData = pixelData.value;
+
+            // 选了豆色板时即使取全量颜色也要映射到真实豆色
+            if (colorCount.value < 256 || hasPaletteColors.value) {
+              quantizeColors();
+            } else {
+              renderCanvas();
+            }
+          });
+        };
+
+        /**
+         * 透明格占位图案：棋盘格，避免透明区露出底色而被误认成深色豆
+         * @param {CanvasRenderingContext2D} ctx - 画布上下文
+         * @returns {CanvasPattern|string} 棋盘格图案，创建失败时退回纯色
+         */
+        const createEmptyPattern = (ctx) => {
+          const tile = document.createElement('canvas');
+          tile.width = 16;
+          tile.height = 16;
+          const tileCtx = tile.getContext('2d');
+          if (!tileCtx || !ctx.createPattern) return '#2a2a38';
+          tileCtx.fillStyle = '#c9c9d4';
+          tileCtx.fillRect(0, 0, 16, 16);
+          tileCtx.fillStyle = '#a5a5b6';
+          tileCtx.fillRect(0, 0, 8, 8);
+          tileCtx.fillRect(8, 8, 8, 8);
+          return ctx.createPattern(tile, 'repeat') || '#2a2a38';
+        };
+
+        /**
+         * 校验画布是否真正可用：尺寸超限时浏览器会静默给出空白画布，
+         * 通过探测背景像素来判断并给出提示
+         * @param {CanvasRenderingContext2D} ctx - 画布上下文
+         * @param {HTMLCanvasElement} canvas - 画布元素
+         * @returns {boolean} 是否可继续渲染
+         */
+        const verifyCanvas = (ctx, canvas) => {
+          try {
+            if (ctx.getImageData(0, 0, 1, 1).data[3] === 0) {
+              canvasError.value = `画布渲染失败：${canvas.width} × ${canvas.height} 超出浏览器上限，请减小像素尺寸后重试`;
+              return false;
+            }
+          } catch (err) {
+            return true; // 探测失败不阻断正常渲染
           }
-
-          // 以画布中心为轴镜像，保证像素对齐
-          if (flipH.value || flipV.value) {
-            tempCtx.translate(w / 2, h / 2);
-            tempCtx.scale(flipH.value ? -1 : 1, flipV.value ? -1 : 1);
-            tempCtx.translate(-w / 2, -h / 2);
-          }
-
-          tempCtx.drawImage(img, drawX, drawY, drawWidth, drawHeight, 0, 0, w, h);
-
-          pixelData.value = tempCtx.getImageData(0, 0, w, h);
-          originalPixelData = pixelData.value;
-
-          if (colorCount.value < 256) {
-            applyColorQuantization();
-          } else {
-            renderCanvas();
-          }
+          return true;
         };
 
         /**
@@ -196,12 +358,20 @@
 
           const canvas = mainCanvas.value;
           const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            canvasError.value = '画布初始化失败：无法获取绘图上下文，请更换浏览器重试';
+            return;
+          }
           const data = pixelData.value.data;
 
           ctx.fillStyle = '#14141f';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
+          if (!verifyCanvas(ctx, canvas)) return;
+          canvasError.value = '';
 
           drawRuler(ctx);
+
+          const emptyPattern = createEmptyPattern(ctx);
 
           for (let y = 0; y < pixelHeight.value; y++) {
             for (let x = 0; x < pixelWidth.value; x++) {
@@ -212,7 +382,7 @@
               const a = data[i + 3];
 
               ctx.fillStyle = a < 128
-                ? 'transparent'
+                ? emptyPattern
                 : `rgba(${r}, ${g}, ${b}, 1)`;
 
               ctx.fillRect(
@@ -293,6 +463,7 @@
 
   Object.assign(PBH.fn, {
     processFile, handleImageUpload, triggerFileInput, onDragOver, onDragLeave, handleDrop,
-    getPixelColor, applyColorQuantization, generatePixelArt, renderCanvas, drawRuler, drawGrid
+    getPixelColor, applyColorQuantization, handleColorCountInput, generatePixelArt,
+    renderCanvas, drawRuler, drawGrid
   });
 })(window.PBH);

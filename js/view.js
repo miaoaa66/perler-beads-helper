@@ -3,7 +3,8 @@
   const {
     scale, pixelData, pixelWidth, pixelHeight, cellSize, mainCanvas, previewContainer,
     canvasWidth, canvasHeight, rulerWidth, rulerHeight,
-    selectedPixel, hoveredPixel, isDragging, lastMouseX, lastMouseY, offsetX, offsetY
+    selectedPixel, hoveredPixel, isDragging, lastMouseX, lastMouseY, offsetX, offsetY,
+    colorUsage, totalBeads
   } = PBH.state;
 
         const handleWheel = (event) => {
@@ -46,6 +47,132 @@
           const link = document.createElement('a');
           link.download = `拼豆像素画_${pixelWidth.value}x${pixelHeight.value}.png`;
           link.href = downloadCanvas.toDataURL('image/png');
+          link.click();
+        };
+
+        /**
+         * 换算图纸导出的格子边长：图幅过大时自动缩小，
+         * 避免创建超出浏览器上限的画布
+         * @param {number} cols - 列数
+         * @param {number} rows - 行数
+         * @returns {number} 每格边长（像素）
+         */
+        const chartCellSize = (cols, rows) => {
+          const MAX_GRID_SIDE = 6000;
+          const longest = Math.max(cols, rows, 1);
+          return Math.max(12, Math.min(40, Math.floor(MAX_GRID_SIDE / longest)));
+        };
+
+        /**
+         * 导出带编号的网格图纸：每格标注豆色号（无豆色板时为用量序号），
+         * 底部附颜色图例（色块 + 色号 + HEX + 颗数）
+         */
+        const downloadChart = () => {
+          const usage = colorUsage.value;
+          if (!pixelData.value || !usage.length) return;
+
+          const cols = pixelWidth.value;
+          const rows = pixelHeight.value;
+          const cell = chartCellSize(cols, rows);
+          const fontSize = Math.max(7, Math.round(cell * 0.32));
+          const pad = 24;
+          const titleH = 30;
+          const gridW = cols * cell;
+          const gridH = rows * cell;
+
+          // 图例按可用宽度分列排布
+          const legendCols = Math.max(1, Math.min(4, Math.floor(gridW / 240) || 1));
+          const legendItemH = 26;
+          const legendRows = Math.ceil(usage.length / legendCols);
+          const legendTop = pad + titleH + gridH + pad;
+
+          const canvas = document.createElement('canvas');
+          canvas.width = gridW + pad * 2;
+          canvas.height = legendTop + legendRows * legendItemH + pad;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // 标题
+          ctx.fillStyle = '#111111';
+          ctx.font = 'bold 16px "Microsoft YaHei", monospace';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(
+            `拼豆图纸  ${cols} × ${rows}  ·  ${usage.length} 色  ·  共 ${totalBeads.value} 颗`,
+            pad, pad + titleH / 2
+          );
+
+          const gridTop = pad + titleH;
+          const orderIndex = new Map();
+          usage.forEach((c, i) => orderIndex.set(c.key, i));
+
+          // 网格：填充色块并写入色号 / 序号
+          const data = pixelData.value.data;
+          ctx.textAlign = 'center';
+          ctx.font = `bold ${fontSize}px "Microsoft YaHei", monospace`;
+          for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+              const i = (y * cols + x) * 4;
+              const px = pad + x * cell;
+              const py = gridTop + y * cell;
+
+              // 空白格（透明）：浅色棋盘格，和豆色格区分
+              if (data[i + 3] < 128) {
+                ctx.fillStyle = ((x + y) % 2 === 0) ? '#f2f2f4' : '#fafafb';
+                ctx.fillRect(px, py, cell, cell);
+                continue;
+              }
+
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+              ctx.fillRect(px, py, cell, cell);
+
+              const item = usage[orderIndex.get((r << 16) | (g << 8) | b)];
+              // 按底色明暗自动切换字色，保证编号可读
+              ctx.fillStyle = (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? '#111111' : '#ffffff';
+              ctx.fillText(item ? item.label : '', px + cell / 2, py + cell / 2 + 1);
+            }
+          }
+
+          // 网格线
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+          ctx.lineWidth = 1;
+          for (let x = 0; x <= cols; x++) {
+            ctx.beginPath();
+            ctx.moveTo(pad + x * cell, gridTop);
+            ctx.lineTo(pad + x * cell, gridTop + gridH);
+            ctx.stroke();
+          }
+          for (let y = 0; y <= rows; y++) {
+            ctx.beginPath();
+            ctx.moveTo(pad, gridTop + y * cell);
+            ctx.lineTo(pad + gridW, gridTop + y * cell);
+            ctx.stroke();
+          }
+
+          // 图例
+          const itemW = gridW / legendCols;
+          ctx.textAlign = 'left';
+          ctx.font = '12px "Microsoft YaHei", monospace';
+          usage.forEach((c, i) => {
+            const ix = pad + (i % legendCols) * itemW;
+            const iy = legendTop + Math.floor(i / legendCols) * legendItemH + legendItemH / 2;
+            ctx.fillStyle = c.hex;
+            ctx.fillRect(ix, iy - 9, 18, 18);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.strokeRect(ix + 0.5, iy - 8.5, 18, 18);
+            ctx.fillStyle = '#111111';
+            ctx.fillText(`${c.label}  ${c.hex}  ×${c.count}`, ix + 26, iy);
+          });
+
+          const link = document.createElement('a');
+          link.download = `拼豆图纸_${cols}x${rows}.png`;
+          link.href = canvas.toDataURL('image/png');
           link.click();
         };
 
@@ -154,7 +281,7 @@
         };
 
   Object.assign(PBH.fn, {
-    handleWheel, downloadPixelArt, getPixelCoordsFromEvent, handleCanvasClick,
+    handleWheel, downloadPixelArt, downloadChart, getPixelCoordsFromEvent, handleCanvasClick,
     handleCanvasHover, handleCanvasLeave, handleMouseDown, handleMouseMove, handleMouseUp, resetPosition
   });
 })(window.PBH);

@@ -183,7 +183,7 @@
     }
 
     .side-panel {
-      width: 300px;
+      width: 400px;
       flex-shrink: 0;
       margin: 14px 0 14px 14px;
       padding: 18px 16px;
@@ -747,4 +747,98 @@
       font-family: var(--px-font);
       font-size: 10px;
       color: var(--px-yellow);
+    }
+
+    /* ============ 豆色板 ============ */
+    .palette-note {
+      margin-top: 6px;
+      font-size: 10px;
+      line-height: 1.5;
+      color: #9a9ab8;
+    }
+
+    /* ============ 用料清单 ============ */
+    .usage-list {
+      margin-top: 8px;
+      max-height: 190px;
+      overflow-y: auto;
+      border: 2px solid var(--px-panel-dark);
+      background: var(--px-panel-dark);
+      box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+    }
+    .usage-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 6px;
+      font-family: var(--px-font);
+      font-size: 9px;
+      color: var(--px-ink);
+    }
+    .usage-item:nth-child(odd) {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .usage-index {
+      min-width: 18px;
+      color: #9a9ab8;
+      text-align: right;
+    }
+    .usage-swatch {
+      width: 12px;
+      height: 12px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .usage-code {
+      color: var(--px-cyan);
+    }
+    .usage-hex {
+      margin-left: auto;
+      color: #9a9ab8;
+    }
+    .usage-count {
+      color: var(--px-yellow);
+    }
+    .usage-empty {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #9a9ab8;
+    }
+
+    /* ============ 画布状态提示 ============ */
+    .canvas-status {
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 80%;
+      padding: 8px 14px;
+      font-family: var(--px-font);
+      font-size: 11px;
+      border: 3px solid var(--px-border);
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+    }
+    .canvas-status.loading {
+      background: var(--px-panel);
+      color: var(--px-cyan);
+    }
+    .canvas-status.error {
+      background: var(--px-red);
+      color: #fff;
+      line-height: 1.5;
+    }
+    .px-spinner {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 auto;
+      background: var(--px-cyan);
+      animation: px-spin 0.9s steps(8, end) infinite;
+    }
+    @keyframes px-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }

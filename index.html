@@ -64,7 +64,29 @@
 
         <div class="control-group">
           <label class="px-label">▸ COLORS <span class="cjk">颜色数量</span>: {{ colorCount }}</label>
-          <input type="range" class="px-range" v-model.number="colorCount" min="2" max="256" step="1" @input="applyColorQuantization">
+          <input type="range" class="px-range" v-model.number="colorCount" min="2" max="256" step="1" @input="handleColorCountInput">
+        </div>
+
+        <div class="control-group">
+          <label class="px-label">▸ BEADS <span class="cjk">豆色板</span></label>
+          <select class="px-input board-select" v-model="paletteKey" @change="applyColorQuantization">
+            <option v-for="(p, key) in palettes" :key="key" :value="key">{{ p.label }}</option>
+          </select>
+          <p class="palette-note cjk" v-if="activePalette">{{ activePalette.note }}</p>
+        </div>
+
+        <div class="control-group">
+          <label class="px-label">▸ USAGE <span class="cjk">用料清单</span>: {{ colorUsage.length }} <span class="cjk">色 /</span> {{ totalBeads }} <span class="cjk">颗</span></label>
+          <div class="usage-list" v-if="colorUsage.length">
+            <div class="usage-item" v-for="(c, i) in colorUsage" :key="c.key" :title="c.name || c.hex">
+              <span class="usage-index">{{ i + 1 }}</span>
+              <span class="usage-swatch" :style="{ backgroundColor: c.hex }"></span>
+              <span class="usage-code">{{ c.label }}</span>
+              <span class="usage-hex">{{ c.hex }}</span>
+              <span class="usage-count">×{{ c.count }}</span>
+            </div>
+          </div>
+          <p class="usage-empty cjk" v-else>暂无数据</p>
         </div>
 
         <div class="control-group">
@@ -111,6 +133,21 @@
                 <rect x="1" y="12" width="12" height="2"/>
               </svg>
               <span class="cjk">下载像素画</span>
+            </span>
+          </button>
+          <button class="nes-btn is-primary full-btn" @click="downloadChart" :disabled="!pixelData || !colorUsage.length">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="0" y="0" width="14" height="2"/>
+                <rect x="0" y="4" width="14" height="2"/>
+                <rect x="0" y="8" width="14" height="2"/>
+                <rect x="0" y="12" width="14" height="2"/>
+                <rect x="2" y="1" width="6" height="2"/>
+                <rect x="6" y="5" width="6" height="2"/>
+                <rect x="2" y="9" width="6" height="2"/>
+                <rect x="6" y="13" width="6" height="2"/>
+              </svg>
+              <span class="cjk">下载图纸</span>
             </span>
           </button>
         </div>
@@ -178,10 +215,19 @@
           ></div>
         </div>
 
+        <!-- 生成中 loading 态 -->
+        <div class="canvas-status loading" v-if="isGenerating">
+          <span class="px-spinner"></span>
+          <span class="cjk">生成中…</span>
+        </div>
+        <!-- 画布异常提示 -->
+        <div class="canvas-status error" v-else-if="canvasError">{{ canvasError }}</div>
+
         <!-- 悬浮信息卡片 -->
         <div class="info-card hovered-info" v-if="hoveredPixel && hoveredPixelColor">
           <div class="info-title">HOVER <span class="cjk">悬浮</span></div>
           <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
+          <div class="position-row" v-if="hoveredPixelColor.code">CODE: <span class="color-code">{{ hoveredPixelColor.code }}</span></div>
           <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
           <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }},{{ hoveredPixelColor.g }},{{ hoveredPixelColor.b }}</span></div>
           <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
@@ -191,6 +237,7 @@
         <div class="info-card selected-info" v-if="selectedPixel && selectedPixelColor">
           <div class="info-title">LOCK <span class="cjk">选中</span></div>
           <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> Y: <span>{{ selectedPixel.y + 1 }}</span></div>
+          <div class="position-row" v-if="selectedPixelColor.code">CODE: <span class="color-code">{{ selectedPixelColor.code }}</span></div>
           <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
           <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }},{{ selectedPixelColor.g }},{{ selectedPixelColor.b }}</span></div>
           <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
@@ -313,6 +360,7 @@
   </div>
 
   <script src="./js/state.js"></script>
+  <script src="./js/palette.js"></script>
   <script src="./js/pixel.js"></script>
   <script src="./js/view.js"></script>
   <script src="./js/crop.js"></script>
