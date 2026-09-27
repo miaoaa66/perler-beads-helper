@@ -10,9 +10,25 @@ window.PBH = window.PBH || { state: {}, fn: {} };
         const originalImage = ref(null);
         const pixelWidth = ref(52);
         const pixelHeight = ref(52);
-        const cellSize = ref(36);
         const rulerWidth = ref(48);
         const rulerHeight = ref(26);
+
+        // 画布面积上限：浏览器对单个 canvas 有尺寸与内存限制，超出会创建失败（画面空白）
+        const DEFAULT_CELL_SIZE = 36;
+        const MAX_CANVAS_AREA = 64 * 1024 * 1024;
+
+        /**
+         * 单元格尺寸：常规尺寸用默认格子；尺寸过大时按面积上限自动缩小，
+         * 保证画布始终不超过浏览器 canvas 限制
+         */
+        const cellSize = computed(() => {
+          for (let size = DEFAULT_CELL_SIZE; size > 1; size--) {
+            const w = pixelWidth.value * size + rulerWidth.value;
+            const h = pixelHeight.value * size + rulerHeight.value;
+            if (w * h <= MAX_CANVAS_AREA) return size;
+          }
+          return 1;
+        });
         const scale = ref(1);
         const pixelData = ref(null);
         const hoveredPixel = ref(null);
@@ -76,7 +92,10 @@ window.PBH = window.PBH || { state: {}, fn: {} };
           { label: '52×52 迷你方板（2.6mm）', w: 52, h: 52 },
           { label: '58×58 四板拼接', w: 58, h: 58 },
           { label: '78×78 迷你大方板（2.6mm）', w: 78, h: 78 },
-          { label: '104×104 迷你特大板（2.6mm）', w: 104, h: 104 }
+          { label: '104×104 迷你特大板（2.6mm）', w: 104, h: 104 },
+          { label: '156×156 78×78 四板拼接', w: 156, h: 156 },
+          { label: '208×208 104×104 四板拼接', w: 208, h: 208 },
+          { label: '232×232 29×29 八板拼接', w: 232, h: 232 }
         ];
 
         const cropBoxStyle = computed(() => ({

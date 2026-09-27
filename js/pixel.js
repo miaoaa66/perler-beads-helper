@@ -251,13 +251,18 @@
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
 
+          // 格子过小时按倍数抽稀刻度：以三位数宽度为准，避免相邻数字挤在一起
+          const labelStep = Math.max(1, Math.ceil((ctx.measureText('000').width + 4) / cellSize.value));
+
           for (let x = 0; x < pixelWidth.value; x++) {
+            if (x % labelStep !== 0) continue;
             const labelX = rulerWidth.value + x * cellSize.value + cellSize.value / 2;
             ctx.fillText((x + 1).toString(), labelX, rulerHeight.value / 2);
           }
 
           ctx.textAlign = 'right';
           for (let y = 0; y < pixelHeight.value; y++) {
+            if (y % labelStep !== 0) continue;
             const labelY = rulerHeight.value + y * cellSize.value + cellSize.value / 2;
             ctx.fillText((y + 1).toString(), rulerWidth.value - 5, labelY);
           }

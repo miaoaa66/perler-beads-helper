@@ -8,8 +8,8 @@
 
         const handleWheel = (event) => {
           const delta = event.deltaY > 0 ? -0.1 : 0.1;
-          const newScale = Math.max(0.01, Math.min(5, scale.value + delta));
-          scale.value = parseFloat(newScale.toFixed(2));
+          const newScale = Math.max(0.1, Math.min(5, scale.value + delta));
+          scale.value = parseFloat(newScale.toFixed(1));
         };
 
         const downloadPixelArt = () => {
