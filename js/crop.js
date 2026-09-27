@@ -5,7 +5,7 @@
     cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage,
     cropAspectRatio, activeRatio, cropType,
     customRatioW, customRatioH, customPxW, customPxH,
-    cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver,
+    cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropImgRect,
     presetRatios
   } = PBH.state;
 
@@ -24,6 +24,7 @@
           cropFlipH.value = false;
           cropFlipV.value = false;
           cropDragOver.value = false;
+          cropImgRect.value = null;
         };
 
         /** 关闭裁剪弹窗 */
@@ -31,6 +32,7 @@
           cropModalOpen.value = false;
           cropImage.value = null;
           cropImageSrc.value = '';
+          cropImgRect.value = null;
         };
 
         /** 获取图片在 stage 内的显示位置与尺寸 */
@@ -50,6 +52,7 @@
         const initCropRect = () => {
           const ir = getCropImgRect();
           if (!ir) return;
+          cropImgRect.value = ir;
 
           let w, h;
           if (cropAspectRatio.value) {
@@ -384,6 +387,13 @@
 
           closeCropModal();
         };
+
+  // 窗口尺寸变化会改变图片显示尺寸，同步刷新像素换算基准
+        window.addEventListener('resize', () => {
+          if (!cropModalOpen.value) return;
+          const ir = getCropImgRect();
+          if (ir) cropImgRect.value = ir;
+        });
 
   Object.assign(PBH.fn, {
     openCropModal, closeCropModal, getCropImgRect, initCropRect, processCropFile,

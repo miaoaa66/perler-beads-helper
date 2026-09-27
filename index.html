@@ -289,6 +289,11 @@
         </template>
 
         <div class="crop-modal-footer">
+          <div class="crop-size-info">
+            <span class="cjk">裁剪尺寸</span>
+            <span class="crop-size-value">{{ cropOutputSize ? cropOutputSize.w + ' × ' + cropOutputSize.h : '— × —' }}</span>
+            <span class="crop-size-unit">PX</span>
+          </div>
           <button class="nes-btn" @click="closeCropModal"><span class="cjk">取消</span></button>
           <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">
             <span class="btn-inner">

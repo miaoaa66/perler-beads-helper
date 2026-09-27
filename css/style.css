@@ -728,3 +728,23 @@
       gap: 10px;
       margin-top: 16px;
     }
+    /* 裁剪框实时尺寸：占据左侧空位，不挤动右侧按钮 */
+    .crop-size-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: auto;
+      padding-left: 4px;
+      font-size: 12px;
+      color: var(--px-cyan);
+    }
+    .crop-size-info .crop-size-value {
+      font-family: var(--px-font);
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+    .crop-size-info .crop-size-unit {
+      font-family: var(--px-font);
+      font-size: 10px;
+      color: var(--px-yellow);
+    }
