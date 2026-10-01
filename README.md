@@ -102,12 +102,19 @@
 5. 「下载图纸」用于动手拼，「下载像素画」用于预览或分享。
 6. 图片有多余部分时，先用「图片裁剪」处理，再上传使用。
 
-## 其他工具
+## 其他拼豆相关网站
 
 ```
 https://aigo.fan/
 https://www.bitbead.app/zh/generator
 http://playbeans.icbear.cn/
+https://www.pixelbeads.io/zh-cn
+https://makebead.com/zh-Hans/
+https://pinxiaodou.com/
+https://perlerbeads.co/zh/templates
+https://beadpatternlab.com/zh-CN
+https://beadpattern.org/zh-CN
+https://pd.anqstar.com/
 
 ```
 
