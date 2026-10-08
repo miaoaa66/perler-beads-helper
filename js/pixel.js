@@ -7,7 +7,9 @@
     pixelData, flipH, flipV, pixelFont, colorCount,
     mainCanvas, imageInfo, canvasWidth, canvasHeight,
     hoveredPixel, selectedPixel, isGenerating, canvasError,
-    activePalette, hasPaletteColors
+    activePalette, hasPaletteColors,
+    highlightKey, highlightOnly, guideRow,
+    offsetX, offsetY, scale
   } = PBH.state;
 
         const processFile = (file) => {
@@ -17,12 +19,12 @@
           const maxSize = 20 * 1024 * 1024;
 
           if (!allowedTypes.includes(file.type)) {
-            alert('不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片');
+            canvasError.value = '不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片';
             return;
           }
 
           if (file.size > maxSize) {
-            alert('图片文件过大，请上传小于 20MB 的图片');
+            canvasError.value = '图片文件过大，请上传小于 20MB 的图片';
             return;
           }
 
@@ -351,7 +353,23 @@
         };
 
         /**
-         * 渲染画布：绘制背景、标尺、像素点、网格
+         * 判断某格在当前高亮/引导模式下是否应被淡化
+         * @param {number} x - 列坐标
+         * @param {number} y - 行坐标
+         * @param {number} key - 该格颜色的 RGB 打包值
+         * @returns {boolean} true 表示需要淡化
+         */
+        const shouldDim = (x, y, key) => {
+          // 逐行引导优先级最高：只点亮当前行
+          if (guideRow.value >= 0) {
+            return y !== guideRow.value;
+          }
+          if (highlightKey.value === null) return false;
+          return key !== highlightKey.value;
+        };
+
+        /**
+         * 渲染画布：绘制背景、标尺、像素点、网格、豆板分区线
          */
         const renderCanvas = () => {
           if (!mainCanvas.value || !pixelData.value) return;
@@ -372,6 +390,9 @@
           drawRuler(ctx);
 
           const emptyPattern = createEmptyPattern(ctx);
+          const dimming = highlightKey.value !== null || guideRow.value >= 0;
+          // 隔离模式下被淡化的格子直接画底色，高亮格子保留原色
+          const dimColor = highlightOnly.value ? '#14141f' : 'rgba(20, 20, 31, 0.72)';
 
           for (let y = 0; y < pixelHeight.value; y++) {
             for (let x = 0; x < pixelWidth.value; x++) {
@@ -380,17 +401,20 @@
               const g = data[i + 1];
               const b = data[i + 2];
               const a = data[i + 3];
+              const px = rulerWidth.value + x * cellSize.value;
+              const py = rulerHeight.value + y * cellSize.value;
+
+              if (dimming && shouldDim(x, y, (r << 16) | (g << 8) | b)) {
+                ctx.fillStyle = a < 128 ? dimColor : dimColor;
+                ctx.fillRect(px, py, cellSize.value, cellSize.value);
+                continue;
+              }
 
               ctx.fillStyle = a < 128
                 ? emptyPattern
                 : `rgba(${r}, ${g}, ${b}, 1)`;
 
-              ctx.fillRect(
-                rulerWidth.value + x * cellSize.value,
-                rulerHeight.value + y * cellSize.value,
-                cellSize.value,
-                cellSize.value
-              );
+              ctx.fillRect(px, py, cellSize.value, cellSize.value);
             }
           }
 
@@ -461,9 +485,28 @@
           }
         };
 
+  /**
+         * 重置工作区：清除图片与像素结果，回到空状态。
+         * 存盘模块在「清除存档」时复用，避免重复清理逻辑。
+         */
+        const resetWorkspace = () => {
+          originalImage.value = null;
+          pixelData.value = null;
+          originalPixelData = null;
+          imageInfo.value = null;
+          hoveredPixel.value = null;
+          selectedPixel.value = null;
+          canvasError.value = '';
+          highlightKey.value = null;
+          guideRow.value = -1;
+          offsetX.value = 0;
+          offsetY.value = 0;
+          scale.value = 1;
+        };
+
   Object.assign(PBH.fn, {
     processFile, handleImageUpload, triggerFileInput, onDragOver, onDragLeave, handleDrop,
     getPixelColor, applyColorQuantization, handleColorCountInput, generatePixelArt,
-    renderCanvas, drawRuler, drawGrid
+    renderCanvas, drawRuler, drawGrid, shouldDim, resetWorkspace
   });
 })(window.PBH);

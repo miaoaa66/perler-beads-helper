@@ -6,7 +6,10 @@
     cropAspectRatio, activeRatio, cropType,
     customRatioW, customRatioH, customPxW, customPxH,
     cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropImgRect,
-    presetRatios
+    presetRatios, canvasError,
+    // 「裁剪并应用」需要写回主画布状态，必须一并解构，
+    // 否则img.onload 里引用会抛 ReferenceError 且被 Vue 静默吞掉
+    originalImage, imageInfo
   } = PBH.state;
 
         // ==================== 图片裁剪 ====================
@@ -25,6 +28,7 @@
           cropFlipV.value = false;
           cropDragOver.value = false;
           cropImgRect.value = null;
+          canvasError.value = '';
         };
 
         /** 关闭裁剪弹窗 */
@@ -80,11 +84,11 @@
           const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp', 'image/gif'];
           const maxSize = 20 * 1024 * 1024;
           if (!allowedTypes.includes(file.type)) {
-            alert('不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片');
+            canvasError.value = '不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片';
             return;
           }
           if (file.size > maxSize) {
-            alert('图片文件过大，请上传小于 20MB 的图片');
+            canvasError.value = '图片文件过大，请上传小于 20MB 的图片';
             return;
           }
 
@@ -339,12 +343,15 @@
           cropDragMode.value = null;
         };
 
-        /** 确认裁剪并保存到本地 */
-        const applyCrop = () => {
-          if (!cropImage.value) return;
+        /**
+         * 执行裁剪并输出画布
+         * @returns {HTMLCanvasElement|null} 裁剪结果画布，取景无效时返回 null
+         */
+        const runCrop = () => {
+          if (!cropImage.value) return null;
 
           const ir = getCropImgRect();
-          if (!ir) return;
+          if (!ir || ir.width <= 0) return null;
 
           const scale = cropImage.value.naturalWidth / ir.width;
           const sx = (cropRect.value.x - ir.left) * scale;
@@ -358,14 +365,15 @@
             outW = customPxW.value;
             outH = customPxH.value;
           } else {
-            outW = Math.round(sw);
-            outH = Math.round(sh);
+            outW = Math.max(1, Math.round(sw));
+            outH = Math.max(1, Math.round(sh));
           }
 
           const outCanvas = document.createElement('canvas');
           outCanvas.width = outW;
           outCanvas.height = outH;
           const ctx = outCanvas.getContext('2d');
+          if (!ctx) return null;
 
           // 应用翻转：翻转输出画布，使裁剪结果与预览中看到的翻转后图像一致
           ctx.save();
@@ -380,12 +388,65 @@
           ctx.drawImage(cropImage.value, sx, sy, sw, sh, 0, 0, outW, outH);
           ctx.restore();
 
+          return outCanvas;
+        };
+
+        /** 确认裁剪并保存到本地 */
+        const applyCrop = () => {
+          const outCanvas = runCrop();
+          if (!outCanvas) return;
+
           const link = document.createElement('a');
-          link.download = `拼豆裁剪_${outW}x${outH}.png`;
+          link.download = `拼豆裁剪_${outCanvas.width}x${outCanvas.height}.png`;
           link.href = outCanvas.toDataURL('image/png');
           link.click();
 
           closeCropModal();
+        };
+
+        /**
+         * 裁剪并直接应用到主画布：跳过「重新上传」这一步，
+         * 裁剪结果立刻进入量化流程
+         */
+        const applyCropToCanvas = () => {
+          const outCanvas = runCrop();
+          if (!outCanvas) return;
+
+          // 用 dataURL 而非 toBlob：file:// 下 blob URL 的解码时序不稳定，
+          // 这里需要同步拿到像素直接塞进 Image，避免中间态丢失
+          let url = '';
+          try {
+            url = outCanvas.toDataURL('image/png');
+          } catch (err) {
+            canvasError.value = '裁剪失败：画布过大，请减小裁剪尺寸后重试';
+            return;
+          }
+          if (!url || url.length < 32) {
+            canvasError.value = '裁剪失败：无法读取裁剪结果，请重试';
+            return;
+          }
+
+          const img = new Image();
+          img.onload = () => {
+            try {
+              // 裁剪即定稿，先清掉上一张图遗留的状态
+              PBH.fn.resetWorkspace();
+              originalImage.value = img;
+              imageInfo.value = { width: img.width, height: img.height };
+              // 先关弹窗再生成，避免弹窗遮挡 loading 态
+              closeCropModal();
+              nextTick(() => {
+                PBH.fn.generatePixelArt();
+                PBH.fn.resetPosition();
+              });
+            } catch (err) {
+              canvasError.value = '裁剪应用失败：' + (err && err.message ? err.message : '未知错误');
+            }
+          };
+          img.onerror = () => {
+            canvasError.value = '裁剪结果解码失败，请重试';
+          };
+          img.src = url;
         };
 
   // 窗口尺寸变化会改变图片显示尺寸，同步刷新像素换算基准
@@ -399,6 +460,7 @@
     openCropModal, closeCropModal, getCropImgRect, initCropRect, processCropFile,
     handleCropImageUpload, onCropDragOver, onCropDragLeave, onCropDrop,
     setPresetRatio, setCropType, applyCustomRatio, applyCustomPixels, fitCropRectToRatio,
-    startMoveCrop, startResizeCrop, handleCropMouseDown, handleCropMouseMove, handleCropMouseUp, applyCrop
+    startMoveCrop, startResizeCrop, handleCropMouseDown, handleCropMouseMove, handleCropMouseUp,
+    runCrop, applyCrop, applyCropToCanvas
   });
 })(window.PBH);

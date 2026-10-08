@@ -77,8 +77,13 @@
 
         <div class="control-group">
           <label class="px-label">▸ USAGE <span class="cjk">用料清单</span>: {{ colorUsage.length }} <span class="cjk">色 /</span> {{ totalBeads }} <span class="cjk">颗</span></label>
+          <p class="usage-tip cjk" v-if="colorUsage.length">点击色块可在画布上定位该色</p>
           <div class="usage-list" v-if="colorUsage.length">
-            <div class="usage-item" v-for="(c, i) in colorUsage" :key="c.key" :title="c.name || c.hex">
+            <div class="usage-item"
+                 v-for="(c, i) in colorUsage" :key="c.key"
+                 :class="{ active: highlightKey === c.key }"
+                 :title="c.name || c.hex"
+                 @click="toggleHighlight(c)">
               <span class="usage-index">{{ i + 1 }}</span>
               <span class="usage-swatch" :style="{ backgroundColor: c.hex }"></span>
               <span class="usage-code">{{ c.label }}</span>
@@ -87,6 +92,14 @@
             </div>
           </div>
           <p class="usage-empty cjk" v-else>暂无数据</p>
+          <div class="focus-bar" v-if="colorUsage.length">
+            <button class="nes-btn focus-btn" :class="{ 'is-success': highlightKey !== null }" @click="onFocusButtonClick">
+              <span class="cjk">{{ highlightKey !== null ? '清除定位' : '定位色号' }}</span>
+            </button>
+            <button class="nes-btn focus-btn" :class="{ 'is-primary': guideRow >= 0 }" @click="startRowGuide">
+              <span class="cjk">逐行引导</span>
+            </button>
+          </div>
         </div>
 
         <div class="control-group">
@@ -247,6 +260,33 @@
           ZOOM {{ Math.round(scale * 100) }}% | {{ pixelWidth }} × {{ pixelHeight }}<br>
           <span class="cjk">滚轮缩放</span> · <span class="cjk">拖动移动</span>
         </div>
+
+        <!-- 逐行引导控制条 -->
+        <div class="guide-bar" v-if="guideRow >= 0">
+          <span class="guide-label cjk">第</span>
+          <span class="guide-row">{{ guideRow + 1 }}</span>
+          <span class="guide-label cjk">/ {{ pixelHeight }} 行</span>
+          <button class="nes-btn guide-btn" @click="stepGuideRow(-1)" :disabled="guideRow <= 0">
+            <span class="cjk">上一行</span>
+          </button>
+          <button class="nes-btn is-primary guide-btn" @click="stepGuideRow(1)">
+            <span class="cjk">{{ guideRow + 1 >= pixelHeight ? '完成' : '下一行' }}</span>
+          </button>
+          <button class="nes-btn is-error guide-btn" @click="stopRowGuide">
+            <span class="cjk">退出</span>
+          </button>
+        </div>
+
+        <!-- 高亮定位提示条 -->
+        <div class="focus-banner" v-else-if="highlightKey !== null && colorUsage.length">
+          <span class="focus-banner-text cjk">
+            正在定位 <strong>{{ (colorUsage.find(c => c.key === highlightKey) || {}).label }}</strong>
+            <template v-if="(colorUsage.find(c => c.key === highlightKey) || {}).name">
+              · {{ (colorUsage.find(c => c.key === highlightKey) || {}).name }}
+            </template>
+          </span>
+          <button class="nes-btn focus-banner-close" @click="clearHighlight">×</button>
+        </div>
       </section>
     </main>
 
@@ -342,6 +382,18 @@
             <span class="crop-size-unit">PX</span>
           </div>
           <button class="nes-btn" @click="closeCropModal"><span class="cjk">取消</span></button>
+          <button class="nes-btn is-primary" @click="applyCropToCanvas" :disabled="!cropImage">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="0" y="2" width="14" height="2"/>
+                <rect x="2" y="4" width="2" height="6"/>
+                <rect x="6" y="4" width="2" height="6"/>
+                <rect x="10" y="4" width="2" height="6"/>
+                <rect x="0" y="10" width="14" height="2"/>
+              </svg>
+              <span class="cjk">裁剪并应用</span>
+            </span>
+          </button>
           <button class="nes-btn is-success" @click="applyCrop" :disabled="!cropImage">
             <span class="btn-inner">
               <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">

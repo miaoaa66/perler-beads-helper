@@ -98,6 +98,14 @@ window.PBH = window.PBH || { state: {}, fn: {} };
           { label: '232×232 29×29 八板拼接', w: 232, h: 232 }
         ];
 
+        // ===== 高亮定位 / 逐行引导 =====
+        /** 被高亮的颜色 key（RGB 打包整数），null 表示不高亮 */
+        const highlightKey = ref(null);
+        /** 逐行引导的当前行号，-1 表示未开启引导 */
+        const guideRow = ref(-1);
+        /** 是否处于「只看高亮色」的隔离显示 */
+        const highlightOnly = ref(false);
+
         const cropBoxStyle = computed(() => ({
           left: cropRect.value.x + 'px',
           top: cropRect.value.y + 'px',
@@ -201,7 +209,8 @@ window.PBH = window.PBH || { state: {}, fn: {} };
   // 状态装配：其他模块与 setup() 通过 PBH.state 共享同一批 ref / computed
   PBH.state = {
     fileInput, cropFileInput, mainCanvas, previewContainer, originalImage, pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight, scale, pixelData, hoveredPixel, selectedPixel, isDragging, isDraggingOver, offsetX, offsetY, lastMouseX, lastMouseY, panelOpen, pixelFont, flipH, flipV, cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage, cropAspectRatio, activeRatio, cropType, customRatioW, customRatioH, customPxW, customPxH, cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropTransform, presetRatios, handles, boardPreset, boardPresets, cropBoxStyle, cropImgRect, cropOutputSize, canvasWidth, canvasHeight, imageInfo, imageRatio, hoveredPixelColor, selectedPixelColor, colorCount,
-    paletteKey, palettes, activePalette, hasPaletteColors, colorUsage, totalBeads, isGenerating, canvasError
+    paletteKey, palettes, activePalette, hasPaletteColors, colorUsage, totalBeads, isGenerating, canvasError,
+    highlightKey, guideRow, highlightOnly
   };
 
         /** 监听尺寸变化，重新渲染画布 */
@@ -232,4 +241,11 @@ window.PBH = window.PBH || { state: {}, fn: {} };
             if (pixelData.value) PBH.fn.renderCanvas();
           });
         }
+
+        /** 高亮 / 逐行引导变化时重绘画布 */
+        watch([highlightKey, highlightOnly, guideRow], () => {
+          if (pixelData.value) {
+            PBH.fn.renderCanvas();
+          }
+        });
 })(window.PBH);

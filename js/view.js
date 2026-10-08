@@ -4,7 +4,7 @@
     scale, pixelData, pixelWidth, pixelHeight, cellSize, mainCanvas, previewContainer,
     canvasWidth, canvasHeight, rulerWidth, rulerHeight,
     selectedPixel, hoveredPixel, isDragging, lastMouseX, lastMouseY, offsetX, offsetY,
-    colorUsage, totalBeads
+    highlightKey, guideRow, highlightOnly, colorUsage, totalBeads, canvasError
   } = PBH.state;
 
         const handleWheel = (event) => {
@@ -13,13 +13,30 @@
           scale.value = parseFloat(newScale.toFixed(1));
         };
 
+        /** 下载画布：统一用 Blob，避免 toDataURL 的 base64 膨胀与内存峰值 */
+        const downloadCanvas = (canvas, filename) => {
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              canvasError.value = '导出失败：画布过大或浏览器内存不足，请减小像素尺寸后重试';
+              return;
+            }
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            link.click();
+            // 交给浏览器读取后再释放，立即 revoke 会导致部分浏览器下载空文件
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+          }, 'image/png');
+        };
+
         const downloadPixelArt = () => {
           if (!pixelData.value) return;
 
-          const downloadCanvas = document.createElement('canvas');
-          const downloadCtx = downloadCanvas.getContext('2d');
-          downloadCanvas.width = pixelWidth.value * cellSize.value;
-          downloadCanvas.height = pixelHeight.value * cellSize.value;
+          const pixelCanvas = document.createElement('canvas');
+          const downloadCtx = pixelCanvas.getContext('2d');
+          pixelCanvas.width = pixelWidth.value * cellSize.value;
+          pixelCanvas.height = pixelHeight.value * cellSize.value;
 
           const data = pixelData.value.data;
 
@@ -44,10 +61,79 @@
             }
           }
 
-          const link = document.createElement('a');
-          link.download = `拼豆像素画_${pixelWidth.value}x${pixelHeight.value}.png`;
-          link.href = downloadCanvas.toDataURL('image/png');
-          link.click();
+          downloadCanvas(pixelCanvas, `拼豆像素画_${pixelWidth.value}x${pixelHeight.value}.png`);
+        };
+
+        // ===== 高亮定位 =====
+
+        /**
+         * 切换某个色号的高亮定位：再次点击同一行取消高亮
+         * @param {Object} color - colorUsage 中的一项
+         */
+        const toggleHighlight = (color) => {
+          if (!color) return;
+          // 高亮与逐行引导互斥，避免两套规则叠加导致看不出重点
+          if (highlightKey.value === color.key) {
+            highlightKey.value = null;
+          } else {
+            guideRow.value = -1;
+            highlightKey.value = color.key;
+          }
+        };
+
+        /** 清除高亮与引导，回到完整画面 */
+        const clearHighlight = () => {
+          highlightKey.value = null;
+          guideRow.value = -1;
+        };
+
+        /** 当前是否处于任一聚焦模式（高亮或逐行引导） */
+        const isFocusMode = () => highlightKey.value !== null || guideRow.value >= 0;
+
+        /**
+         * 「定位 / 清除定位」按钮的唯一入口，行为必须与按钮文案一致。
+         * 不能直接用 toggleHighlight(colorUsage[0])：那是以「首个色号」为基准做切换，
+         * 当高亮的是其他色号时点击会跳到第一个色号，而不是清除定位。
+         */
+        const onFocusButtonClick = () => {
+          if (highlightKey.value !== null) {
+            clearHighlight();
+          } else {
+            toggleHighlight(colorUsage.value[0]);
+          }
+        };
+
+        // ===== 逐行引导 =====
+
+        /** 进入逐行引导，从第一行开始 */
+        const startRowGuide = () => {
+          highlightKey.value = null;
+          guideRow.value = 0;
+        };
+
+        /**
+         * 逐行引导前进 / 后退
+         * @param {number} delta - 步长，1 为下一行，-1 为上一行
+         */
+        const stepGuideRow = (delta) => {
+          if (guideRow.value < 0) {
+            startRowGuide();
+            return;
+          }
+          const next = guideRow.value + delta;
+          // 越过末行后退出引导，避免卡在空状态
+          if (next >= pixelHeight.value) {
+            guideRow.value = -1;
+          } else if (next < 0) {
+            guideRow.value = 0;
+          } else {
+            guideRow.value = next;
+          }
+        };
+
+        /** 退出逐行引导 */
+        const stopRowGuide = () => {
+          guideRow.value = -1;
         };
 
         /**
@@ -112,6 +198,7 @@
           // 网格：填充色块并写入色号 / 序号
           const data = pixelData.value.data;
           ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
           ctx.font = `bold ${fontSize}px "Microsoft YaHei", monospace`;
           for (let y = 0; y < rows; y++) {
             for (let x = 0; x < cols; x++) {
@@ -170,10 +257,7 @@
             ctx.fillText(`${c.label}  ${c.hex}  ×${c.count}`, ix + 26, iy);
           });
 
-          const link = document.createElement('a');
-          link.download = `拼豆图纸_${cols}x${rows}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
+          downloadCanvas(canvas, `拼豆图纸_${cols}x${rows}.png`);
         };
 
         /**
@@ -281,7 +365,10 @@
         };
 
   Object.assign(PBH.fn, {
-    handleWheel, downloadPixelArt, downloadChart, getPixelCoordsFromEvent, handleCanvasClick,
-    handleCanvasHover, handleCanvasLeave, handleMouseDown, handleMouseMove, handleMouseUp, resetPosition
+    handleWheel, downloadPixelArt, downloadChart, chartCellSize,
+    getPixelCoordsFromEvent, handleCanvasClick,
+    handleCanvasHover, handleCanvasLeave, handleMouseDown, handleMouseMove, handleMouseUp, resetPosition,
+    toggleHighlight, clearHighlight, isFocusMode, onFocusButtonClick,
+    startRowGuide, stepGuideRow, stopRowGuide
   });
 })(window.PBH);
