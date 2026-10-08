@@ -43,6 +43,8 @@ window.PBH = window.PBH || { state: {}, fn: {} };
         // 界面开关
         const panelOpen = ref(true);   // 左侧操作面板展开状态，默认展开
         const pixelFont = ref(true);   // 是否启用像素字体，默认启用
+        const detailHorizontal = ref(true); // 颜色详情（悬浮 / 选中）排列方向：默认横向并排，关闭后纵向堆叠
+        const showZoomInfo = ref(true);     // 右下角缩放提示是否显示，默认显示
         const flipH = ref(false);      // 水平翻转
         const flipV = ref(false);      // 垂直翻转
 
@@ -208,7 +210,7 @@ window.PBH = window.PBH || { state: {}, fn: {} };
 
   // 状态装配：其他模块与 setup() 通过 PBH.state 共享同一批 ref / computed
   PBH.state = {
-    fileInput, cropFileInput, mainCanvas, previewContainer, originalImage, pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight, scale, pixelData, hoveredPixel, selectedPixel, isDragging, isDraggingOver, offsetX, offsetY, lastMouseX, lastMouseY, panelOpen, pixelFont, flipH, flipV, cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage, cropAspectRatio, activeRatio, cropType, customRatioW, customRatioH, customPxW, customPxH, cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropTransform, presetRatios, handles, boardPreset, boardPresets, cropBoxStyle, cropImgRect, cropOutputSize, canvasWidth, canvasHeight, imageInfo, imageRatio, hoveredPixelColor, selectedPixelColor, colorCount,
+    fileInput, cropFileInput, mainCanvas, previewContainer, originalImage, pixelWidth, pixelHeight, cellSize, rulerWidth, rulerHeight, scale, pixelData, hoveredPixel, selectedPixel, isDragging, isDraggingOver, offsetX, offsetY, lastMouseX, lastMouseY, panelOpen, pixelFont, detailHorizontal, showZoomInfo, flipH, flipV, cropModalOpen, cropImage, cropImageSrc, cropImageEl, cropStage, cropAspectRatio, activeRatio, cropType, customRatioW, customRatioH, customPxW, customPxH, cropRect, cropDragMode, cropDragStart, cropFlipH, cropFlipV, cropDragOver, cropTransform, presetRatios, handles, boardPreset, boardPresets, cropBoxStyle, cropImgRect, cropOutputSize, canvasWidth, canvasHeight, imageInfo, imageRatio, hoveredPixelColor, selectedPixelColor, colorCount,
     paletteKey, palettes, activePalette, hasPaletteColors, colorUsage, totalBeads, isGenerating, canvasError,
     highlightKey, guideRow, highlightOnly
   };

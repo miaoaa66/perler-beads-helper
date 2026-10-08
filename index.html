@@ -26,6 +26,16 @@
           <span class="px-switch"></span>
           <span class="cjk">像素字体</span>
         </label>
+        <label class="px-switch-item" :class="{ on: detailHorizontal }" title="颜色详情横向并排 / 关闭后纵向堆叠">
+          <input type="checkbox" v-model="detailHorizontal">
+          <span class="px-switch"></span>
+          <span class="cjk">详情横排</span>
+        </label>
+        <label class="px-switch-item" :class="{ on: showZoomInfo }" title="显示 / 隐藏右下角缩放提示">
+          <input type="checkbox" v-model="showZoomInfo">
+          <span class="px-switch"></span>
+          <span class="cjk">右下提示</span>
+        </label>
       </div>
       <div class="repo-links">
         <a class="repo-link gitee" href="https://gitee.com/miaoaa66/perler-beads-helper" target="_blank" rel="noopener noreferrer" title="Gitee 仓库" aria-label="Gitee 仓库">
@@ -236,27 +246,32 @@
         <!-- 画布异常提示 -->
         <div class="canvas-status error" v-else-if="canvasError">{{ canvasError }}</div>
 
-        <!-- 悬浮信息卡片 -->
-        <div class="info-card hovered-info" v-if="hoveredPixel && hoveredPixelColor">
-          <div class="info-title">HOVER <span class="cjk">悬浮</span></div>
-          <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
-          <div class="position-row" v-if="hoveredPixelColor.code">CODE: <span class="color-code">{{ hoveredPixelColor.code }}</span></div>
-          <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
-          <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }},{{ hoveredPixelColor.g }},{{ hoveredPixelColor.b }}</span></div>
-          <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
+        <!-- 悬浮 / 选中信息卡片：排列方向由顶部「详情横排」开关控制 -->
+        <div class="info-cards"
+             :class="detailHorizontal ? 'layout-horizontal' : 'layout-vertical'"
+             v-if="(hoveredPixel && hoveredPixelColor) || (selectedPixel && selectedPixelColor)">
+          <!-- 悬浮信息卡片 -->
+          <div class="info-card hovered-info" v-if="hoveredPixel && hoveredPixelColor">
+            <div class="info-title">HOVER <span class="cjk">悬浮</span></div>
+            <div class="position-row">X: <span>{{ hoveredPixel.x + 1 }}</span> Y: <span>{{ hoveredPixel.y + 1 }}</span></div>
+            <div class="position-row" v-if="hoveredPixelColor.code">CODE: <span class="color-code">{{ hoveredPixelColor.code }}</span></div>
+            <div class="position-row">HEX: <span class="color-code">{{ hoveredPixelColor.hex }}</span></div>
+            <div class="position-row">RGB: <span class="color-code">{{ hoveredPixelColor.r }},{{ hoveredPixelColor.g }},{{ hoveredPixelColor.b }}</span></div>
+            <div class="color-swatch" :style="{ backgroundColor: hoveredPixelColor.hex }"></div>
+          </div>
+
+          <!-- 选中信息卡片 -->
+          <div class="info-card selected-info" v-if="selectedPixel && selectedPixelColor">
+            <div class="info-title">LOCK <span class="cjk">选中</span></div>
+            <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> Y: <span>{{ selectedPixel.y + 1 }}</span></div>
+            <div class="position-row" v-if="selectedPixelColor.code">CODE: <span class="color-code">{{ selectedPixelColor.code }}</span></div>
+            <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
+            <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }},{{ selectedPixelColor.g }},{{ selectedPixelColor.b }}</span></div>
+            <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
+          </div>
         </div>
 
-        <!-- 选中信息卡片 -->
-        <div class="info-card selected-info" v-if="selectedPixel && selectedPixelColor">
-          <div class="info-title">LOCK <span class="cjk">选中</span></div>
-          <div class="position-row">X: <span>{{ selectedPixel.x + 1 }}</span> Y: <span>{{ selectedPixel.y + 1 }}</span></div>
-          <div class="position-row" v-if="selectedPixelColor.code">CODE: <span class="color-code">{{ selectedPixelColor.code }}</span></div>
-          <div class="position-row">HEX: <span class="color-code">{{ selectedPixelColor.hex }}</span></div>
-          <div class="position-row">RGB: <span class="color-code">{{ selectedPixelColor.r }},{{ selectedPixelColor.g }},{{ selectedPixelColor.b }}</span></div>
-          <div class="color-swatch" :style="{ backgroundColor: selectedPixelColor.hex }"></div>
-        </div>
-
-        <div class="zoom-info">
+        <div class="zoom-info" v-if="showZoomInfo">
           ZOOM {{ Math.round(scale * 100) }}% | {{ pixelWidth }} × {{ pixelHeight }}<br>
           <span class="cjk">滚轮缩放</span> · <span class="cjk">拖动移动</span>
         </div>
