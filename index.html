@@ -12,7 +12,7 @@
   <div id="app">
     <!-- 标题栏 -->
     <header class="title-bar">
-      <span class="title-logo">▚▞</span>
+      <img class="title-logo" src="./static/images/logo.png" alt="Perler Beads Helper Logo">
       <h1 class="title-text">PERLER BEADS <span class="title-accent">HELPER</span></h1>
       <span class="title-sub"><span class="cjk">拼豆辅助工具</span> v1.0</span>
       <div class="title-controls">
@@ -193,7 +193,7 @@
       <!-- 右侧预览区 -->
       <section class="preview-area" ref="previewContainer" @wheel.prevent="handleWheel" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
         <div v-if="!originalImage" class="empty-state" :class="{ dragging: isDraggingOver }" @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="handleDrop">
-          <div class="icon">▚▞▚</div>
+          <div class="icon"><img src="./static/images/logo.png" alt="Perler Beads Helper Logo"></div>
           <p>点击此处选择图片<br>或将图片拖拽到此处上传</p>
           <p class="tip"><span class="cjk">支持</span>: JPEG / PNG / WebP / AVIF / BMP / GIF | <span class="cjk">最大</span> 20MB</p>
         </div>

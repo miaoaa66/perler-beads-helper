@@ -98,10 +98,11 @@
       user-select: none;
     }
     .title-logo {
-      font-size: 20px;
-      color: var(--px-cyan);
-      text-shadow: 2px 0 0 var(--px-red), -2px 0 0 var(--px-blue);
-      letter-spacing: -4px;
+      width: 32px;
+      height: 32px;
+      display: block;
+      image-rendering: pixelated;
+      flex-shrink: 0;
     }
     .title-text {
       font-family: var(--px-font);
@@ -508,8 +509,14 @@
       background: rgba(146, 204, 65, 0.1);
     }
     .empty-state .icon {
-      font-size: 40px;
-      letter-spacing: -6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .empty-state .icon img {
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
     }
     .empty-state p {
       margin-top: 14px;
