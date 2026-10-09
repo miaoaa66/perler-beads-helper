@@ -136,7 +136,7 @@ https://pd.anqstar.com/
 本项目代码遵循 MIT 许可证（见 [LICENSE](./LICENSE)）。以下第三方资源的授权独立于本项目，请遵循其各自的许可证：
 
 - **Press Start 2P** 字体（作者 CodeMan38）：SIL Open Font License 1.1，见 [static/press-start-2p.OFL.txt](./static/press-start-2p.OFL.txt)。
-- **NES.css**：MIT 许可证，见 [static/nes.min.css](./static/nes.min.css) 文件头部声明。
+- **NES.css**：MIT 许可证，见 [static/nes.min.css](./static/nes.min.css) 文件头部声明，预览：https://nostalgic-css.github.io/NES.css/ ，仓库：https://github.com/nostalgic-css/NES.css 。
 - **Vue 3**：MIT 许可证，见 [static/vue.3.5.38.js](./static/vue.3.5.38.js) 文件头部声明。
 
 
