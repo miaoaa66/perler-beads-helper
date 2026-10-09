@@ -42,6 +42,10 @@
       overflow: hidden;
       font-size: 12px;
     }
+    /* Vue 挂载前隐藏未编译模板，避免指令未生效导致的闪烁（如裁剪弹窗） */
+    [v-cloak] {
+      display: none !important;
+    }
     #app {
       width: 100%;
       height: 100%;
