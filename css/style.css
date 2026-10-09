@@ -10,7 +10,9 @@
       --px-panel: #1b1b2f;
       --px-panel-dark: #14141f;
       --px-ink: #f8f8f8;
-      --px-cyan: #00d9ff;
+      --px-text-sub: #b0b0cc;
+      --px-cyan: #00b8e6;
+      --px-cyan-light: #4cc9f0;
       --px-yellow: #f7d51d;
       --px-green: #92cc41;
       --px-red: #e76e55;
@@ -55,9 +57,11 @@
       letter-spacing: 1px;
       white-space: nowrap;
     }
-    /* Press Start 2P 的字形整体落在基线之上，中文需上移才与英文视觉对齐 */
+    /* Press Start 2P 的字形整体落在基线之上，且字重偏小；
+       中文略微缩小并上移，与英文像素字体视觉重量更均衡 */
     body:not(.no-pixel-font) .cjk {
       vertical-align: 0.22em;
+      font-size: 0.9em;
     }
     /* 关闭像素字体时中英文同为雅黑，无需补偿 */
     body.no-pixel-font .cjk {
@@ -113,7 +117,7 @@
     }
     .title-sub {
       font-size: 12px;
-      color: #888;
+      color: var(--px-text-sub);
       margin-left: auto;
     }
     .title-controls {
@@ -139,7 +143,7 @@
       justify-content: center;
       width: 34px;
       height: 34px;
-      color: #9a9ab8;
+      color: var(--px-text-sub);
       background: var(--px-panel-dark);
       border: 4px solid var(--px-border);
       box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.5);
@@ -183,9 +187,9 @@
     }
 
     .side-panel {
-      width: 400px;
+      width: 340px;
       flex-shrink: 0;
-      margin: 14px 0 14px 14px;
+      margin: 10px 0 10px 10px;
       padding: 18px 16px;
       overflow-y: auto;
       overflow-x: hidden;
@@ -221,8 +225,10 @@
     }
     .px-label {
       font-size: 11px;
-      color: #9a9ab8;
+      color: var(--px-yellow);
       letter-spacing: 1px;
+      font-family: var(--px-font);
+      line-height: 1.5;
     }
     .image-info {
       font-size: 11px;
@@ -347,7 +353,7 @@
     .preview-area {
       position: relative;
       flex: 1;
-      margin: 14px;
+      margin: 10px;
       border: 4px solid var(--px-border);
       box-shadow:
         inset 0 0 0 4px #000,
@@ -423,15 +429,15 @@
       background: var(--px-panel-dark);
       border: 4px solid var(--px-cyan);
       box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 0.5);
-      width: 200px;
-      padding: 10px 12px;
+      width: 210px;
+      padding: 12px 14px;
       color: var(--px-cyan);
-      font-size: 11px;
+      font-size: 12px;
       pointer-events: auto;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      line-height: 1.5;
+      gap: 7px;
+      line-height: 1.6;
     }
     .selected-info {
       border-color: var(--px-red);
@@ -449,7 +455,7 @@
     .position-row {
       display: flex;
       gap: 8px;
-      color: #aaa;
+      color: var(--px-text-sub);
     }
     .info-card span {
       color: #fff;
@@ -457,6 +463,7 @@
     .color-code {
       font-family: var(--px-font);
       font-size: 10px;
+      font-weight: bold;
     }
     .color-swatch {
       width: 48px;
@@ -481,9 +488,9 @@
     .empty-state {
       text-align: center;
       padding: 60px;
-      color: #666;
+      color: var(--px-text-sub);
       cursor: pointer;
-      border: 4px dashed #444;
+      border: 4px dashed #4a4a6a;
       transition: all 0.15s;
       width: 80%;
       max-width: 520px;
@@ -492,7 +499,7 @@
     }
     .empty-state:hover {
       border-color: var(--px-cyan);
-      color: #aaa;
+      color: var(--px-ink);
       background: rgba(0, 217, 255, 0.05);
     }
     .empty-state.dragging {
@@ -511,7 +518,8 @@
     }
     .empty-state .tip {
       font-size: 10px;
-      color: #666;
+      color: var(--px-text-sub);
+      opacity: 0.7;
     }
 
     /* ============ 裁剪弹窗 ============ */
@@ -567,16 +575,16 @@
       line-height: 1 !important;
     }
     .crop-upload-zone {
-      border: 4px dashed #444;
+      border: 4px dashed #4a4a6a;
       padding: 44px;
       text-align: center;
-      color: #666;
+      color: var(--px-text-sub);
       cursor: pointer;
       background: rgba(0, 0, 0, 0.25);
     }
     .crop-upload-zone:hover {
       border-color: var(--px-cyan);
-      color: #aaa;
+      color: var(--px-ink);
     }
     .crop-upload-zone.dragging {
       border-color: var(--px-green);
@@ -601,7 +609,7 @@
       gap: 10px;
       cursor: pointer;
       font-size: 11px;
-      color: #9a9ab8;
+      color: var(--px-text-sub);
       user-select: none;
       /* NES.css 给 label 设了 margin-bottom，会导致 flex 居中时整体上移 */
       margin: 0;
@@ -669,7 +677,7 @@
     }
     .crop-hint {
       font-size: 11px;
-      color: #9a9ab8;
+      color: var(--px-text-sub);
       line-height: 1.6;
     }
     .ratio-group {
@@ -680,7 +688,7 @@
     }
     .ratio-group label {
       font-size: 11px;
-      color: #9a9ab8;
+      color: var(--px-text-sub);
     }
     .ratio-group span {
       color: var(--px-cyan);
@@ -764,15 +772,15 @@
     /* ============ 豆色板 ============ */
     .palette-note {
       margin-top: 6px;
-      font-size: 10px;
-      line-height: 1.5;
-      color: #9a9ab8;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--px-text-sub);
     }
 
     /* ============ 用料清单 ============ */
     .usage-list {
       margin-top: 8px;
-      max-height: 190px;
+      max-height: 260px;
       overflow-y: auto;
       border: 2px solid var(--px-panel-dark);
       background: var(--px-panel-dark);
@@ -781,23 +789,24 @@
     .usage-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 3px 6px;
+      gap: 7px;
+      padding: 5px 8px;
       font-family: var(--px-font);
-      font-size: 9px;
+      font-size: 10px;
       color: var(--px-ink);
+      line-height: 1.4;
     }
     .usage-item:nth-child(odd) {
       background: rgba(255, 255, 255, 0.04);
     }
     .usage-index {
-      min-width: 18px;
-      color: #9a9ab8;
+      min-width: 20px;
+      color: var(--px-text-sub);
       text-align: right;
     }
     .usage-swatch {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       flex: 0 0 auto;
       border: 1px solid rgba(255, 255, 255, 0.6);
     }
@@ -806,7 +815,7 @@
     }
     .usage-hex {
       margin-left: auto;
-      color: #9a9ab8;
+      color: var(--px-text-sub);
     }
     .usage-count {
       color: var(--px-yellow);
@@ -814,14 +823,14 @@
     .usage-empty {
       margin-top: 8px;
       font-size: 11px;
-      color: #9a9ab8;
+      color: var(--px-text-sub);
     }
 
     /* ============ 用料清单定位 ============ */
     .usage-tip {
       margin-top: 6px;
-      font-size: 10px;
-      color: #9a9ab8;
+      font-size: 11px;
+      color: var(--px-text-sub);
       letter-spacing: 0;
     }
     .usage-item {
@@ -951,4 +960,72 @@
     @keyframes px-spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+
+    /* ============ 响应式 ============ */
+    @media (max-width: 1280px) {
+      .side-panel {
+        width: 310px;
+        padding: 16px 14px;
+      }
+      .title-text {
+        font-size: 14px;
+      }
+      .title-controls {
+        gap: 14px;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .side-panel {
+        width: 290px;
+        margin: 10px 0 10px 10px;
+        padding: 14px 12px;
+      }
+      .title-bar {
+        padding: 10px 16px;
+        gap: 12px;
+      }
+      .title-text {
+        font-size: 13px;
+      }
+      .title-sub {
+        display: none;
+      }
+      .usage-list {
+        max-height: 200px;
+      }
+      .info-cards {
+        top: 12px;
+        left: 12px;
+        gap: 12px;
+      }
+      .info-card {
+        width: 180px;
+        padding: 10px 12px;
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .side-panel {
+        position: absolute;
+        z-index: 150;
+        height: calc(100% - 20px);
+        width: 280px;
+      }
+      .title-controls {
+        gap: 10px;
+        padding-left: 6px;
+      }
+      .repo-links {
+        gap: 8px;
+        padding-left: 10px;
+      }
+      .empty-state {
+        padding: 40px 20px;
+      }
+      .empty-state .icon {
+        font-size: 32px;
+      }
     }

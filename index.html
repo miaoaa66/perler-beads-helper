@@ -50,17 +50,17 @@
     <main class="main-area">
       <!-- 左侧控制台 -->
       <aside class="side-panel px-panel" :class="{ collapsed: !panelOpen }">
-        <h2 class="panel-title">▸ CONSOLE <span class="cjk">控制台</span></h2>
+        <h2 class="panel-title">CONSOLE <span class="cjk">控制台</span></h2>
 
         <div class="control-group">
-          <label class="px-label">▸ IMAGE <span class="cjk">图片</span></label>
+          <label class="px-label">IMAGE <span class="cjk">图片</span></label>
           <input type="file" accept="image/*" @change="handleImageUpload" ref="fileInput" style="display:none">
           <button class="nes-btn is-primary full-btn" @click="triggerFileInput"><span class="cjk">选择图片</span></button>
           <div v-if="imageInfo" class="image-info">{{ imageRatio }}</div>
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ SIZE <span class="cjk">尺寸</span> (<span class="cjk">像素点</span>)</label>
+          <label class="px-label">SIZE <span class="cjk">尺寸</span>(<span class="cjk">像素点</span>)</label>
           <div class="input-row">
             <input type="number" class="px-input" :value="pixelWidth" min="5" max="300" step="1" @input="handleSizeInput($event, 'width')">
             <span class="px-x">×</span>
@@ -73,12 +73,12 @@
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ COLORS <span class="cjk">颜色数量</span>: {{ colorCount }}</label>
+          <label class="px-label">COLORS <span class="cjk">颜色数量</span>:{{ colorCount }}</label>
           <input type="range" class="px-range" v-model.number="colorCount" min="2" max="256" step="1" @input="handleColorCountInput">
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ BEADS <span class="cjk">豆色板</span></label>
+          <label class="px-label">BEADS <span class="cjk">豆色板</span></label>
           <select class="px-input board-select" v-model="paletteKey" @change="applyColorQuantization">
             <option v-for="(p, key) in palettes" :key="key" :value="key">{{ p.label }}</option>
           </select>
@@ -86,7 +86,7 @@
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ USAGE <span class="cjk">用料清单</span>: {{ colorUsage.length }} <span class="cjk">色 /</span> {{ totalBeads }} <span class="cjk">颗</span></label>
+          <label class="px-label">USAGE <span class="cjk">用料清单</span>:{{ colorUsage.length }}<span class="cjk">色/ </span>{{ totalBeads }}<span class="cjk">颗</span></label>
           <p class="usage-tip cjk" v-if="colorUsage.length">点击色块可在画布上定位该色</p>
           <div class="usage-list" v-if="colorUsage.length">
             <div class="usage-item"
@@ -113,7 +113,7 @@
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ FLIP <span class="cjk">翻转</span></label>
+          <label class="px-label">FLIP <span class="cjk">翻转</span></label>
           <div class="switch-row compact">
             <label class="px-switch-item" :class="{ on: flipH, disabled: !originalImage }">
               <input type="checkbox" v-model="flipH" :disabled="!originalImage">
@@ -129,7 +129,7 @@
         </div>
 
         <div class="control-group">
-          <label class="px-label">▸ ZOOM <span class="cjk">缩放</span>: {{ Math.round(scale * 100) }}%</label>
+          <label class="px-label">ZOOM <span class="cjk">缩放</span>:{{ Math.round(scale * 100) }}%</label>
           <input type="range" class="px-range" v-model.number="scale" min="0.1" max="5" step="0.1">
         </div>
 
@@ -350,7 +350,7 @@
           </div>
 
           <div class="crop-ratio-section" v-if="cropType === 'free'">
-            <p class="crop-hint">▸ <span class="cjk">拖动裁剪框边角或边缘手柄，自由调整宽高</span></p>
+            <p class="crop-hint"><span class="cjk">拖动裁剪框边角或边缘手柄，自由调整宽高</span></p>
           </div>
 
           <div class="crop-ratio-section" v-else-if="cropType === 'ratio'">
