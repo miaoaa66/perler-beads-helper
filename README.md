@@ -10,8 +10,10 @@
 ![preview](./preview/preview.png)
 ### 上传图片界面   
 ![preview2](./preview/preview2.png)
-### 裁剪图片弹窗界面   
+### 浏览色卡   
 ![preview3](./preview/preview3.png)
+### 裁剪图片弹窗界面   
+![preview4](./preview/preview4.png)
 ### 原始色图纸   
 ![拼豆图纸_52x52_原始色](./preview/拼豆图纸_52x52_原始色.png)
 ### Hama图纸   
