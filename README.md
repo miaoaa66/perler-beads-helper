@@ -162,6 +162,7 @@ PBH.definePalette('perler', 'Perler', '美国 · 5mm midi · 58 色', [
 
 ## 其他拼豆相关网站
 
+拼豆工具
 ```
 https://aigo.fan/
 https://www.bitbead.app/zh/generator
@@ -169,11 +170,33 @@ http://playbeans.icbear.cn/
 https://www.pixelbeads.io/zh-cn
 https://makebead.com/zh-Hans/
 https://pinxiaodou.com/
-https://perlerbeads.co/zh/templates
+https://perlerbeads.co/zh/generator
 https://beadpatternlab.com/zh-CN
 https://beadpattern.org/zh-CN
 https://pd.anqstar.com/
 https://pindou.io/
+
+```
+
+拼豆图纸
+```
+https://www.bitbead.app/zh/library/bacb0000-b239-4c5a-8f2e-37db408d7fd0
+https://www.bitbead.app/zh/library/1a68377b-32ff-40fc-a967-4956bc8e1486
+https://www.bitbead.app/zh/library/b700d760-4795-482f-aaf8-03e1355763e2
+https://www.bitbead.app/zh/library/ef806242-e043-4b6d-8280-921d4261ede7
+https://www.bitbead.app/zh/library/337a5794-46d9-4fc6-b921-a1ada2fd8490
+https://www.bitbead.app/zh/library/f2f9e8ad-cf35-5b96-be08-92642975c4ce
+https://www.bitbead.app/zh/library/c43c06d4-b7c5-45fa-9fb8-18e0035369fb
+
+
+
+
+
+
+
+
+
+
 
 ```
 
