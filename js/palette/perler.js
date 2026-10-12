@@ -1,0 +1,70 @@
+/**
+ * Perler 色卡（美国 · 5mm midi · 58 色）
+ *
+ * 由 palette.js 统一注册；数据来源与免责声明见 palette.js 文件头。
+ * 屏幕 HEX 与实物豆子存在批次/光线差异，仅作选色参考。
+ */
+(function (PBH) {
+  'use strict';
+
+  PBH.definePalette('perler', 'Perler', '美国 · 5mm midi · 58 色', [
+    { code: 'P01',  name: 'White',             hex: '#F1F1F1', r: 241, g: 241, b: 241 },
+    { code: 'P02',  name: 'Cream',             hex: '#E0DEA9', r: 224, g: 222, b: 169 },
+    { code: 'P03',  name: 'Yellow',            hex: '#ECD800', r: 236, g: 216, b:   0 },
+    { code: 'P04',  name: 'Orange',            hex: '#ED6120', r: 237, g:  97, b:  32 },
+    { code: 'P05',  name: 'Red',               hex: '#F01820', r: 240, g:  24, b:  32 },
+    { code: 'P06',  name: 'Bubblegum',         hex: '#DD669B', r: 221, g: 102, b: 155 },
+    { code: 'P07',  name: 'Purple',            hex: '#604089', r:  96, g:  64, b: 137 },
+    { code: 'P08',  name: 'Dark Blue',         hex: '#2B3F87', r:  43, g:  63, b: 135 },
+    { code: 'P09',  name: 'Light Blue',        hex: '#3370C0', r:  51, g: 112, b: 192 },
+    { code: 'P10',  name: 'Dark Green',        hex: '#1C753E', r:  28, g: 117, b:  62 },
+    { code: 'P11',  name: 'Light Green',       hex: '#56BA9F', r:  86, g: 186, b: 159 },
+    { code: 'P12',  name: 'Brown',             hex: '#513931', r:  81, g:  57, b:  49 },
+    { code: 'P17',  name: 'Grey',              hex: '#8A8D91', r: 138, g: 141, b: 145 },
+    { code: 'P18',  name: 'Black',             hex: '#2E2F32', r:  46, g:  47, b:  50 },
+    { code: 'P20',  name: 'Rust',              hex: '#8C372C', r: 140, g:  55, b:  44 },
+    { code: 'P21',  name: 'Light Brown',       hex: '#815D34', r: 129, g:  93, b:  52 },
+    { code: 'P33',  name: 'Peach',             hex: '#EEBAB2', r: 238, g: 186, b: 178 },
+    { code: 'P35',  name: 'Tan',               hex: '#BC9371', r: 188, g: 147, b: 113 },
+    { code: 'P38',  name: 'Magenta',           hex: '#F22A7B', r: 242, g:  42, b: 123 },
+    { code: 'P47',  name: 'Neon Yellow',       hex: '#DCE002', r: 220, g: 224, b:   2 },
+    { code: 'P48',  name: 'Neon Orange',       hex: '#FF7700', r: 255, g: 119, b:   0 },
+    { code: 'P49',  name: 'Neon Green',        hex: '#019E43', r:   1, g: 158, b:  67 },
+    { code: 'P50',  name: 'Neon Pink',         hex: '#FF3991', r: 255, g:  57, b: 145 },
+    { code: 'P52',  name: 'Pastel Blue',       hex: '#5390D1', r:  83, g: 144, b: 209 },
+    { code: 'P53',  name: 'Pastel Green',      hex: '#76C882', r: 118, g: 200, b: 130 },
+    { code: 'P54',  name: 'Pastel Lavender',   hex: '#8A72C1', r: 138, g: 114, b: 193 },
+    { code: 'P56',  name: 'Pastel Yellow',     hex: '#FEF875', r: 254, g: 248, b: 117 },
+    { code: 'P57',  name: 'Cheddar',           hex: '#F1AA0C', r: 241, g: 170, b:  12 },
+    { code: 'P58',  name: 'Toothpaste',        hex: '#93C8D4', r: 147, g: 200, b: 212 },
+    { code: 'P59',  name: 'Hot Coral',         hex: '#FF3851', r: 255, g:  56, b:  81 },
+    { code: 'P60',  name: 'Plum',              hex: '#A24B9C', r: 162, g:  75, b: 156 },
+    { code: 'P61',  name: 'Kiwi Lime',         hex: '#6CBE13', r: 108, g: 190, b:  19 },
+    { code: 'P62',  name: 'Turquoise',         hex: '#2B89C6', r:  43, g: 137, b: 198 },
+    { code: 'P63',  name: 'Blush',             hex: '#FF8285', r: 255, g: 130, b: 133 },
+    { code: 'P70',  name: 'Periwinkle Blue',   hex: '#647CBE', r: 100, g: 124, b: 190 },
+    { code: 'P75',  name: 'Glow Green',        hex: '#BEC696', r: 190, g: 198, b: 150 },
+    { code: 'P79',  name: 'Light Pink',        hex: '#F6B3DD', r: 246, g: 179, b: 221 },
+    { code: 'P80',  name: 'Bright Green',      hex: '#4FAD42', r:  79, g: 173, b:  66 },
+    { code: 'P81',  name: 'Light Gray',        hex: '#EEE3CF', r: 238, g: 227, b: 207 },
+    { code: 'P82',  name: 'Lavender',          hex: '#AD98D4', r: 173, g: 152, b: 212 },
+    { code: 'P83',  name: 'Pink',              hex: '#E44892', r: 228, g:  72, b: 146 },
+    { code: 'P85',  name: 'Gold',              hex: '#BB7634', r: 187, g: 118, b:  52 },
+    { code: 'P88',  name: 'Raspberry',         hex: '#A53061', r: 165, g:  48, b:  97 },
+    { code: 'P89',  name: 'Neon Blue',         hex: '#406AE1', r:  64, g: 106, b: 225 },
+    { code: 'P90',  name: 'Butterscotch',      hex: '#D48437', r: 212, g: 132, b:  55 },
+    { code: 'P91',  name: 'Parrot Green',      hex: '#067C81', r:   6, g: 124, b: 129 },
+    { code: 'P92',  name: 'Dark Grey',         hex: '#4D5156', r:  77, g:  81, b:  86 },
+    { code: 'P93',  name: 'Blueberry Cream',   hex: '#8297D9', r: 130, g: 151, b: 217 },
+    { code: 'P96',  name: 'Cranapple',         hex: '#801922', r: 128, g:  25, b:  34 },
+    { code: 'P97',  name: 'Prickly Pear',      hex: '#BDDA01', r: 189, g: 218, b:   1 },
+    { code: 'P98',  name: 'Sand',              hex: '#E4B690', r: 228, g: 182, b: 144 },
+    { code: 'P100', name: 'Pearl Coral',       hex: '#F97E79', r: 249, g: 126, b: 121 },
+    { code: 'P101', name: 'Pearl Light Blue',  hex: '#7AAEA2', r: 122, g: 174, b: 162 },
+    { code: 'P102', name: 'Pearl Green',       hex: '#84B791', r: 132, g: 183, b: 145 },
+    { code: 'P103', name: 'Pearl Yellow',      hex: '#CAC033', r: 202, g: 192, b:  51 },
+    { code: 'P104', name: 'Pearl Light Pink',  hex: '#D7A8A2', r: 215, g: 168, b: 162 },
+    { code: 'P105', name: 'Silver',            hex: '#777B81', r: 119, g: 123, b: 129 },
+    { code: 'P179', name: 'Evergreen',         hex: '#114938', r:  17, g:  73, b:  56 }
+  ], { url: 'https://perler.com/', origin: '美国', size: 5 });
+})(window.PBH);

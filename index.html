@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>拼豆辅助工具</title>
+  <link rel="icon" href="./static/images/logo.png">
   <link rel="stylesheet" href="./static/nes.min.css">
   <link rel="stylesheet" href="./css/style.css">
   <script src="./static/vue.3.5.38.js"></script>
@@ -83,6 +84,17 @@
             <option v-for="(p, key) in palettes" :key="key" :value="key">{{ p.label }}</option>
           </select>
           <p class="palette-note cjk" v-if="activePalette">{{ activePalette.note }}</p>
+          <button class="nes-btn full-btn palette-card-btn" @click="openColorCard(paletteKey)">
+            <span class="btn-inner">
+              <svg class="btn-icon" viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="0" y="0" width="6" height="6"/>
+                <rect x="8" y="0" width="6" height="6"/>
+                <rect x="0" y="8" width="6" height="6"/>
+                <rect x="8" y="8" width="6" height="6"/>
+              </svg>
+              <span class="cjk">浏览色卡</span>
+            </span>
+          </button>
         </div>
 
         <div class="control-group">
@@ -424,13 +436,122 @@
         </div>
       </div>
     </div>
+
+    <!-- 豆色卡浏览器 -->
+    <div v-if="ccOpen" class="cc-overlay" @mousedown.self="closeColorCard">
+      <div class="cc-modal px-panel">
+        <div class="cc-header">
+          <h3 class="cc-title">
+            <svg class="cc-title-icon" viewBox="0 0 14 14" aria-hidden="true">
+              <rect x="0" y="0" width="6" height="6"/>
+              <rect x="8" y="0" width="6" height="6"/>
+              <rect x="0" y="8" width="6" height="6"/>
+              <rect x="8" y="8" width="6" height="6"/>
+            </svg>
+            COLOR CARD <span class="cjk">豆色卡</span>
+          </h3>
+          <div class="cc-tabs">
+            <button type="button" class="nes-btn cc-tab" :class="{ 'is-primary': ccTab === 'card' }" @click="setColorCardTab('card')"><span class="cjk">色卡</span></button>
+            <button type="button" class="nes-btn cc-tab" :class="{ 'is-primary': ccTab === 'compare' }" @click="setColorCardTab('compare')"><span class="cjk">品牌对照</span></button>
+          </div>
+          <button type="button" class="nes-btn is-error cc-close" @click="closeColorCard" title="关闭">×</button>
+        </div>
+
+        <!-- 视图一：按品牌浏览色卡 -->
+        <div class="cc-body" v-if="ccTab === 'card'">
+          <aside class="cc-brands">
+            <button type="button" v-for="b in ccBrands" :key="b.key"
+                    class="cc-brand" :class="{ active: ccActive && b.key === ccActive.key }"
+                    @click="setColorCardBrand(b.key)">
+              <span class="cc-brand-name">{{ b.label }}</span>
+              <span class="cc-brand-count">{{ b.count }}</span>
+            </button>
+          </aside>
+
+          <section class="cc-main" v-if="ccActive">
+            <div class="cc-info">
+              <div class="cc-info-head">
+                <h4 class="cc-info-name">{{ ccActive.label }}</h4>
+                <a v-if="ccActive.url" class="cc-info-link" :href="ccActive.url" target="_blank" rel="noopener noreferrer"><span class="cjk">官网</span> ↗</a>
+              </div>
+              <p class="cc-info-note cjk">{{ ccActive.note }}</p>
+              <div class="cc-info-stats">
+                <span class="cc-stat"><em>{{ ccActive.count }}</em><span class="cjk">色</span></span>
+                <span class="cc-stat" v-if="ccActive.board"><em>{{ ccActive.board }}</em> cm<span class="cjk"> · 58×58 成品</span></span>
+              </div>
+              <button type="button" class="nes-btn is-success cc-use" @click="useColorCard"><span class="cjk">用这套色卡出图</span></button>
+            </div>
+
+            <div class="cc-toolbar">
+              <input type="text" class="px-input cc-search" v-model="ccSearch" placeholder="搜索色号 / 色名 / HEX">
+              <span class="cc-result cjk">{{ ccColors.length }} / {{ ccActive.count }} 色</span>
+            </div>
+
+            <div class="cc-grid">
+              <button type="button" v-for="c in ccColors" :key="c.code + c.hex"
+                      class="cc-swatch" :title="'点击复制色号 ' + (c.code || c.hex)"
+                      @click="copyColorCode(c)">
+                <span class="cc-chip" :style="{ backgroundColor: c.hex }"></span>
+                <span class="cc-meta">
+                  <span class="cc-code">{{ c.code }}</span>
+                  <span class="cc-name" v-if="c.name && c.name !== c.code">{{ c.name }}</span>
+                  <span class="cc-hex">{{ c.hex }}</span>
+                </span>
+              </button>
+              <p class="cc-empty cjk" v-if="!ccColors.length">没有匹配的色号</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- 视图二：品牌规格对照 -->
+        <div class="cc-compare" v-else>
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th><span class="cjk">品牌</span></th>
+                <th><span class="cjk">产地</span></th>
+                <th><span class="cjk">豆子尺寸</span></th>
+                <th><span class="cjk">色数</span></th>
+                <th><span class="cjk">58×58 成品</span></th>
+                <th><span class="cjk">官网</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="b in ccBrands" :key="b.key">
+                <td class="cc-td-name">{{ b.label }}</td>
+                <td class="cjk">{{ b.origin }}</td>
+                <td>{{ b.size ? b.size + ' mm' : '—' }}</td>
+                <td>{{ b.count }}</td>
+                <td>{{ b.board ? b.board + ' cm' : '—' }}</td>
+                <td>
+                  <a v-if="b.url" :href="b.url" target="_blank" rel="noopener noreferrer">↗</a>
+                  <span v-else class="cc-muted cjk">无</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="cc-compare-tip cjk">58×58 成品为按豆子标称直径估算的边长，实物因间隙略有差异；尺寸与在售色数以商家最新标注为准。</p>
+        </div>
+
+        <div class="cc-copied" v-if="ccCopied"><span class="cjk">已复制</span> {{ ccCopied }}</div>
+      </div>
+    </div>
   </div>
 
   <script src="./js/state.js"></script>
   <script src="./js/palette.js"></script>
+  <script src="./js/palette/perler.js"></script>
+  <script src="./js/palette/hama.js"></script>
+  <script src="./js/palette/mixiaowo.js"></script>
+  <script src="./js/palette/mard-221.js"></script>
+  <script src="./js/palette/mard-291.js"></script>
+  <script src="./js/palette/coco-291.js"></script>
+  <script src="./js/palette/artkal.js"></script>
+  <script src="./js/palette/artkal-mini.js"></script>
   <script src="./js/pixel.js"></script>
   <script src="./js/view.js"></script>
   <script src="./js/crop.js"></script>
+  <script src="./js/colorcard.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

@@ -49,10 +49,23 @@
 - **颜色数量**滑块可调 2–256 色，取图内用量最多的前 N 种颜色；拖动滑块时做了防抖处理，不会卡顿。
 - **豆色板**可选，把像素画的颜色映射到真实在售豆色并标注色号：
   - 原始色：不做映射，直接沿用图片量化结果
-  - Perler（美国 · 5mm midi · 58 色）
-  - Hama（丹麦 · 5mm midi · 46 色）
-  - 咪小窝（MARD 色卡对照 · 244 色）
+  - Perler（美国 · 大豆 5mm · 58 色） https://perler.com/
+  - Hama（丹麦 · 大豆 5mm · 46 色） https://hama.dk/
+  - 咪小窝（MARD 色卡对照 · 244 色） 
+  - MARD 221（中国 · 小豆 2.6mm · 221 色） https://mard.taobao.com
+  - MARD 291（中国 · 小豆 2.6mm · 291 色） https://mard.taobao.com
+  - COCO 291（中国 · 小豆 2.6mm · 291 色） 
+  - Artkal（中国 · 大豆 5mm · 176 色） https://www.artkalbead.com/
+  - Artkal Mini（中国 · 小豆 2.6mm · 221 色） https://www.artkalbead.com/
 - 选定豆色板后，超出颜色数量的颜色会就近合并到保留色，保证成品只出现买得到的豆色。
+
+### 豆色卡浏览
+
+- 左侧「豆色板」下方点「浏览色卡」，打开豆色卡弹窗，按品牌查看完整色卡：**色块 + 色号 + 色名 + HEX**。
+- 弹窗左侧为品牌列表，可快速切换 8 个在售品牌；右上角搜索框支持按色号 / 色名 / HEX 过滤。
+- 点击任意色块即复制色号（该色无独立色号时复制 HEX），弹窗底部给出「已复制」提示。
+- 「用这套色卡出图」一键把当前品牌设为出图豆色板并关闭弹窗，省去回面板再选一次。
+- 「品牌对照」页签汇总各品牌的产地、豆子尺寸、色数与 58×58 成品边长，有官网的品牌可直接跳转。
 
 ### 用料清单
 
@@ -114,6 +127,39 @@
 5. 「下载图纸」用于动手拼，「下载像素画」用于预览或分享。
 6. 图片有多余部分时，先用「图片裁剪」处理，再上传使用。
 
+## 色卡数据维护
+
+各品牌色卡按「一个品牌一个文件」拆分布置，便于单独增删和校对：
+
+```
+js/
+├── palette.js            # 色板入口：定义 PBH.definePalette 与 PBH.palettes
+└── palette/
+    ├── perler.js         # Perler
+    ├── hama.js           # Hama
+    ├── mixiaowo.js       # 咪小窝（MARD 色卡对照）
+    ├── mard-221.js       # MARD 221
+    ├── mard-291.js       # MARD 291
+    ├── coco-291.js       # COCO 291
+    ├── artkal.js         # Artkal
+    └── artkal-mini.js    # Artkal Mini
+```
+
+新增或修改品牌时，只需在 `js/palette/` 下编辑对应文件，并在 `index.html` 里按顺序引入（**必须排在 `palette.js` 之后**）：
+
+```js
+PBH.definePalette('perler', 'Perler', '美国 · 5mm midi · 58 色', [
+  { code: 'P01', name: 'White', hex: '#F1F1F1', r: 241, g: 241, b: 241 },
+  // ...
+], { url: 'https://perler.com/', origin: '美国', size: 5 });
+```
+
+- 五个参数依次为：唯一键（同时作为下拉框 value）、显示名、规格说明、色卡数组、可选元信息。
+- 元信息 `{ url, origin, size }`：官网或官方渠道、产地、豆子直径（mm，未知填 `null`），供豆色卡浏览与品牌对照表使用；缺省时按规格文案兜底解析。
+- 色卡项字段固定为 `code / name / hex / r / g / b`，`r/g/b` 由 HEX 换算，用于最近色匹配。
+- 本项目无构建步骤，因此使用普通 `<script>` 标签引入；**不使用 ES Module**，以保证 `file://` 方式双击打开仍可正常运行。
+- 豆色卡浏览的视图与交互在 `js/colorcard.js`，样式在 `css/style.css` 的「豆色卡浏览器」段落。
+
 ## 其他拼豆相关网站
 
 ```
@@ -127,6 +173,7 @@ https://perlerbeads.co/zh/templates
 https://beadpatternlab.com/zh-CN
 https://beadpattern.org/zh-CN
 https://pd.anqstar.com/
+https://pindou.io/
 
 ```
 

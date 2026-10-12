@@ -974,6 +974,406 @@
       to { transform: rotate(360deg); }
     }
 
+    /* ============ 豆色卡入口按钮 ============ */
+    .palette-card-btn {
+      margin-top: 8px;
+    }
+
+    /* ============ 豆色卡浏览器 ============ */
+    .cc-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 210;
+      background: rgba(0, 0, 0, 0.78);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .cc-modal {
+      position: relative;
+      width: 100%;
+      max-width: 1080px;
+      height: 88vh;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .cc-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 4px dashed rgba(255, 255, 255, 0.25);
+      flex-shrink: 0;
+    }
+    .cc-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: var(--px-yellow);
+      font-family: var(--px-font);
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .cc-title-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      flex-shrink: 0;
+      shape-rendering: crispEdges;
+    }
+    .cc-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .cc-tab {
+      padding: 4px 10px !important;
+      font-size: 10px !important;
+    }
+    .cc-close {
+      margin-left: auto;
+      width: 34px;
+      height: 34px;
+      padding: 0 !important;
+      font-size: 14px !important;
+      line-height: 1 !important;
+    }
+
+    /* 主体：左品牌列表 + 右色卡区 */
+    .cc-body {
+      flex: 1;
+      display: flex;
+      gap: 16px;
+      min-height: 0;
+    }
+    .cc-brands {
+      width: 178px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 12px;
+      border-right: 4px dashed rgba(255, 255, 255, 0.18);
+    }
+    .cc-brand {
+      -webkit-appearance: none;
+      appearance: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 10px;
+      background: var(--px-panel-dark);
+      color: var(--px-text-sub);
+      border: 3px solid #3a3a55;
+      font-family: var(--px-font-plain);
+      font-size: 12px;
+      text-align: left;
+      cursor: var(--px-hover-pointer);
+      transition: color 0.12s steps(2), border-color 0.12s steps(2), transform 0.12s steps(2);
+    }
+    .cc-brand:hover {
+      color: var(--px-cyan);
+      border-color: var(--px-cyan);
+      transform: translate(-1px, -1px);
+    }
+    .cc-brand.active {
+      color: #0d0d17;
+      background: var(--px-cyan);
+      border-color: var(--px-border);
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+    }
+    .cc-brand-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cc-brand-count {
+      font-family: var(--px-font);
+      font-size: 10px;
+      flex-shrink: 0;
+      opacity: 0.85;
+    }
+
+    .cc-main {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cc-info {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 12px 14px;
+      background: var(--px-panel-dark);
+      border: 3px solid var(--px-border);
+      box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.5);
+    }
+    .cc-info-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .cc-info-name {
+      margin: 0;
+      font-family: var(--px-font);
+      font-size: 15px;
+      color: var(--px-cyan);
+      letter-spacing: 1px;
+    }
+    .cc-info-link {
+      font-size: 11px;
+      color: var(--px-yellow);
+      text-decoration: none;
+      border-bottom: 2px dotted currentColor;
+      padding-bottom: 1px;
+    }
+    .cc-info-link:hover {
+      color: var(--px-green);
+    }
+    .cc-info-note {
+      width: 100%;
+      margin: 0;
+      font-size: 11px;
+      color: var(--px-text-sub);
+    }
+    .cc-info-stats {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+    }
+    .cc-stat {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+      font-family: var(--px-font);
+      font-size: 11px;
+      color: var(--px-text-sub);
+    }
+    .cc-stat em {
+      font-style: normal;
+      font-size: 14px;
+      color: var(--px-green);
+    }
+    .cc-use {
+      margin-left: auto;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+
+    .cc-toolbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .cc-search {
+      flex: 1;
+    }
+    .cc-search::placeholder {
+      color: #6a6a90;
+    }
+    .cc-result {
+      font-size: 11px;
+      color: var(--px-text-sub);
+      white-space: nowrap;
+    }
+
+    .cc-grid {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+      padding: 2px 8px 8px 2px;
+      align-content: start;
+    }
+    .cc-swatch {
+      -webkit-appearance: none;
+      appearance: none;
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      /* 需容纳 色号 / 色名 / HEX 三行，高度不足时 flex 会把色名行压扁 */
+      min-height: 68px;
+      padding: 0;
+      overflow: hidden;
+      background: var(--px-panel-dark);
+      border: 3px solid #3a3a55;
+      font-family: var(--px-font);
+      text-align: left;
+      cursor: var(--px-hover-pointer);
+      transition: border-color 0.12s steps(2), transform 0.12s steps(2);
+    }
+    .cc-swatch:hover {
+      border-color: var(--px-cyan);
+      transform: translate(-1px, -1px);
+    }
+    .cc-swatch:active {
+      transform: translate(1px, 1px);
+    }
+    .cc-chip {
+      width: 48px;
+      flex: 0 0 48px;
+      border-right: 3px solid rgba(0, 0, 0, 0.5);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    }
+    .cc-meta {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1px;
+      padding: 8px 8px 8px 0;
+      min-width: 0;
+    }
+    /* 三行文本不允许被压缩，否则卡片高度不足时色名会被压成一条线 */
+    .cc-meta > span {
+      flex: 0 0 auto;
+      line-height: 1.4;
+    }
+    .cc-code {
+      font-size: 11px;
+      color: var(--px-cyan);
+    }
+    .cc-name {
+      font-family: var(--px-font-plain);
+      font-size: 11px;
+      color: var(--px-ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cc-hex {
+      font-size: 10px;
+      color: var(--px-text-sub);
+    }
+    .cc-empty {
+      grid-column: 1 / -1;
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--px-text-sub);
+    }
+
+    /* 品牌对照表 */
+    .cc-compare {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--px-font-plain);
+      font-size: 12px;
+    }
+    .cc-table th,
+    .cc-table td {
+      padding: 9px 10px;
+      text-align: left;
+      border: 2px solid #2a2a3f;
+    }
+    .cc-table th {
+      background: var(--px-panel-dark);
+      color: var(--px-yellow);
+      font-family: var(--px-font);
+      font-size: 10px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .cc-table tbody tr:nth-child(odd) {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .cc-table tbody tr:hover {
+      background: rgba(0, 217, 255, 0.08);
+    }
+    .cc-td-name {
+      color: var(--px-cyan);
+      font-weight: bold;
+    }
+    .cc-table a {
+      color: var(--px-yellow);
+      text-decoration: none;
+    }
+    .cc-table a:hover {
+      color: var(--px-green);
+    }
+    .cc-muted {
+      color: #5a5a7a;
+    }
+    .cc-compare-tip {
+      font-size: 11px;
+      line-height: 1.7;
+      color: var(--px-text-sub);
+    }
+
+    /* 复制提示 */
+    .cc-copied {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      z-index: 5;
+      padding: 6px 14px;
+      background: var(--px-green);
+      color: #0d0d17;
+      border: 3px solid var(--px-border);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+      font-family: var(--px-font);
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .cc-overlay {
+        padding: 10px;
+      }
+      .cc-modal {
+        height: 94vh;
+        padding: 14px;
+      }
+      .cc-body {
+        flex-direction: column;
+      }
+      .cc-brands {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0 0 8px;
+        border-right: 0;
+        border-bottom: 4px dashed rgba(255, 255, 255, 0.18);
+      }
+      .cc-brand {
+        flex: 0 0 auto;
+      }
+      .cc-use {
+        margin-left: 0;
+        width: 100%;
+      }
+      .cc-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
+      .cc-table {
+        font-size: 11px;
+      }
+    }
+
     /* ============ 响应式 ============ */
     @media (max-width: 1280px) {
       .side-panel {
