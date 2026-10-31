@@ -82,8 +82,13 @@
           if (!file) return;
 
           const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp', 'image/gif'];
+          const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'bmp', 'gif'];
           const maxSize = 20 * 1024 * 1024;
-          if (!allowedTypes.includes(file.type)) {
+          // 部分浏览器/系统对 bmp、avif 上传时 file.type 为空串，此时退回扩展名判断
+          const ext = (file.name.split('.').pop() || '').toLowerCase();
+          const typeValid = allowedTypes.includes(file.type) ||
+            (file.type === '' && allowedExtensions.includes(ext));
+          if (!typeValid) {
             canvasError.value = '不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片';
             return;
           }
@@ -285,51 +290,58 @@
           w = right - left;
           h = bottom - top;
 
-          // 比例锁定
+          // 比例锁定：固定锚点或中心调整后，统一收缩到图片可用范围，保证比例不被边界破坏
           if (ratio) {
-            // 以对角锚点或中心调整比例
             if (growsLeft && growsTop) {
               // 固定右下角
-              const bw = Math.max(w, h * ratio);
-              const bh = Math.max(w / ratio, h);
-              if (bw / bh > ratio) { w = bh * ratio; h = bh; } else { h = bw / ratio; w = bw; }
+              w = Math.min(Math.max(w, h * ratio), right - ir.left, (bottom - ir.top) * ratio);
+              h = w / ratio;
               left = right - w;
               top = bottom - h;
             } else if (growsRight && growsBottom) {
               // 固定左上角
-              const bw = Math.max(w, h * ratio);
-              const bh = Math.max(w / ratio, h);
-              if (bw / bh > ratio) { w = bh * ratio; h = bh; } else { h = bw / ratio; w = bw; }
+              w = Math.min(Math.max(w, h * ratio), ir.left + ir.width - left, (ir.top + ir.height - top) * ratio);
+              h = w / ratio;
               right = left + w;
               bottom = top + h;
             } else if (growsRight && growsTop) {
               // 固定左下角
-              w = h * ratio;
+              w = Math.min(Math.max(w, h * ratio), ir.left + ir.width - left, (bottom - ir.top) * ratio);
+              h = w / ratio;
               right = left + w;
               top = bottom - h;
             } else if (growsLeft && growsBottom) {
               // 固定右上角
-              w = h * ratio;
+              w = Math.min(Math.max(w, h * ratio), right - ir.left, (ir.top + ir.height - top) * ratio);
+              h = w / ratio;
               left = right - w;
               bottom = top + h;
-            } else {
-              // 单边手柄，按比例调整另一边（保持中心）
-              if (growsLeft || growsRight) {
-                h = w / ratio;
-                const centerY = top + h / 2;
-                top = centerY - h / 2;
-                bottom = top + h;
+            } else if (growsLeft || growsRight) {
+              // 左右单边手柄：高度按比例调整，并与起始框的纵向中心对齐
+              w = Math.min(w, ir.width, ir.height * ratio);
+              h = w / ratio;
+              if (growsRight) {
+                left = Math.max(ir.left, Math.min(left, ir.left + ir.width - w));
               } else {
-                w = h * ratio;
-                const centerX = left + w / 2;
-                left = centerX - w / 2;
-                right = left + w;
+                left = Math.max(ir.left, Math.min(right - w, ir.left + ir.width - w));
               }
-              // 再次边界约束
-              if (left < ir.left) { left = ir.left; right = left + w; }
-              if (right > ir.left + ir.width) { right = ir.left + ir.width; w = right - left; h = w / ratio; }
-              if (top < ir.top) { top = ir.top; bottom = top + h; }
-              if (bottom > ir.top + ir.height) { bottom = ir.top + ir.height; h = bottom - top; w = h * ratio; }
+              right = left + w;
+              const centerY = start.y + start.h / 2;
+              top = Math.max(ir.top, Math.min(centerY - h / 2, ir.top + ir.height - h));
+              bottom = top + h;
+            } else {
+              // 上下单边手柄：宽度按比例调整，并与起始框的横向中心对齐
+              h = Math.min(h, ir.height, ir.width / ratio);
+              w = h * ratio;
+              if (growsBottom) {
+                top = Math.max(ir.top, Math.min(top, ir.top + ir.height - h));
+              } else {
+                top = Math.max(ir.top, Math.min(bottom - h, ir.top + ir.height - h));
+              }
+              bottom = top + h;
+              const centerX = start.x + start.w / 2;
+              left = Math.max(ir.left, Math.min(centerX - w / 2, ir.left + ir.width - w));
+              right = left + w;
             }
           }
 
@@ -354,8 +366,16 @@
           if (!ir || ir.width <= 0) return null;
 
           const scale = cropImage.value.naturalWidth / ir.width;
-          const sx = (cropRect.value.x - ir.left) * scale;
-          const sy = (cropRect.value.y - ir.top) * scale;
+          // 预览中的图片开启翻转时是镜像显示的：裁剪框叠加在镜像后的画面上，
+          // 需按镜像坐标反算源图区域，否则导出的是框外对称位置的内容
+          const srcLeft = cropFlipH.value
+            ? ir.left + ir.width - (cropRect.value.x + cropRect.value.w)
+            : cropRect.value.x - ir.left;
+          const srcTop = cropFlipV.value
+            ? ir.top + ir.height - (cropRect.value.y + cropRect.value.h)
+            : cropRect.value.y - ir.top;
+          const sx = srcLeft * scale;
+          const sy = srcTop * scale;
           const sw = cropRect.value.w * scale;
           const sh = cropRect.value.h * scale;
 

@@ -16,9 +16,14 @@
           if (!file) return;
 
           const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp', 'image/gif'];
+          const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'bmp', 'gif'];
           const maxSize = 20 * 1024 * 1024;
+          // 部分浏览器/系统对 bmp、avif 上传时 file.type 为空串，此时退回扩展名判断
+          const ext = (file.name.split('.').pop() || '').toLowerCase();
+          const typeValid = allowedTypes.includes(file.type) ||
+            (file.type === '' && allowedExtensions.includes(ext));
 
-          if (!allowedTypes.includes(file.type)) {
+          if (!typeValid) {
             canvasError.value = '不支持的图片格式，请上传 JPEG、PNG、WebP、AVIF、BMP 或 GIF 格式的图片';
             return;
           }
@@ -55,8 +60,11 @@
           isDraggingOver.value = true;
         };
 
-        const onDragLeave = () => {
-          isDraggingOver.value = false;
+        const onDragLeave = (event) => {
+          // 拖到子元素上时 relatedTarget 仍属于区域内节点，不算离开
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            isDraggingOver.value = false;
+          }
         };
 
         const handleDrop = (event) => {
@@ -356,7 +364,7 @@
          * 判断某格在当前高亮/引导模式下是否应被淡化
          * @param {number} x - 列坐标
          * @param {number} y - 行坐标
-         * @param {number} key - 该格颜色的 RGB 打包值
+         * @param {number|null} key - 该格颜色的 RGB 打包值，透明格为 null
          * @returns {boolean} true 表示需要淡化
          */
         const shouldDim = (x, y, key) => {
@@ -365,6 +373,8 @@
             return y !== guideRow.value;
           }
           if (highlightKey.value === null) return false;
+          // 透明格的 RGB 恒为 0，不参与高亮匹配，避免高亮纯黑豆色时露出棋盘格
+          if (key === null) return true;
           return key !== highlightKey.value;
         };
 
@@ -404,8 +414,10 @@
               const px = rulerWidth.value + x * cellSize.value;
               const py = rulerHeight.value + y * cellSize.value;
 
-              if (dimming && shouldDim(x, y, (r << 16) | (g << 8) | b)) {
-                ctx.fillStyle = a < 128 ? dimColor : dimColor;
+              // 透明格的 RGB 恒为 0，用 null 表示，避免与纯黑豆色（key = 0）混淆
+              const key = a < 128 ? null : (r << 16) | (g << 8) | b;
+              if (dimming && shouldDim(x, y, key)) {
+                ctx.fillStyle = dimColor;
                 ctx.fillRect(px, py, cellSize.value, cellSize.value);
                 continue;
               }
